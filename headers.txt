@@ -1,0 +1,11 @@
+HTTP/1.1 200 OK
+Date: Sun, 17 Apr 2016 12:41:13 GMT
+Server: Apache/2.2.3 (Red Hat)
+Cache-Control: no-cache, no-store, must-revalidate
+Pragma: no-cache
+Expires: Thu, 01 Jan 1970 00:00:00 GMT
+Set-Cookie: JSESSIONID=DDB968FAAC12AFB95764F03C35392555.aplus-2016-90; Path=/aplus2016/; HttpOnly
+Content-Length: 906
+Connection: close
+Content-Type: text/html;charset=ISO-8859-1
+
