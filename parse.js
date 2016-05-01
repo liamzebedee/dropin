@@ -5,7 +5,8 @@ var jq = require('jquery');
 var allClassesEVER = [];
 
 var timetableFile = process.argv[2];
-console.log(timetableFile);
+// console.log(timetableFile);
+var subjectCode = timetableFile.split('/')[1].split('.html')[0];
 // 'rawtimetables/12311.html'
 var html = fs.readFileSync(timetableFile);
 // first argument can be html string, filename, or url
@@ -122,7 +123,10 @@ function getClassesFromTimetable($) {
 		});
 	});	
 
-	console.log(JSON.stringify(classes));
+	console.log(JSON.stringify({
+		subjectCode: subjectCode,
+		classes: classes
+	}));
 
 	return classes;
 }
