@@ -13,6 +13,21 @@ dropin UTS
 
 
 
-## Design
+## App
+ 1. `nvm install 6;nvm use 6 && nvm alias default 6`
+ 2. `npm install`
+ 3. `npm start`
+
+
+
+Near me:
+
 Filter by building code and level
-Search by keywords for class
+Tick: lectures, workshops/tutorials/computer lab, 
+
+
+Search subjects:
+
+Search by keywords for class-
+	show subjects
+		show timetable for those subjects
