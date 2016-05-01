@@ -99,10 +99,12 @@ function getClassesFromTimetable($) {
 				return;
 			}
 
+			// only match city campus with regex
 			var locations = classInfo[info_location].match(/C[a-zA-Z0-9][^\s]+/g);
 			if(!locations || !locations[0]) {
-				console.log(locationInfo)
-				throw new Error("Can't find full location for "+timetableFile);
+				return;
+				// console.log(locationInfo)
+				// throw new Error("Can't find full location for "+timetableFile);
 			}
 			var classLocation = locations[0].split('.');
 

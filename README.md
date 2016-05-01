@@ -10,7 +10,10 @@ dropin UTS
  - Some subjects just have a 'an unexpected error has occurred'. Try ignore these. e.g. `node parse.js 11525.html` should return empty array and not error.
  - Subject `010042` has a weird format where there is no location -- CNR - CLASS NOT REQUIRED
  - Subject `11172` has a weird format for the location.
+ - some random stuff in the JSON at 92510
 
+ MP.01.02
+MP.01.01
 
 
 ## App
@@ -31,3 +34,4 @@ Search subjects:
 Search by keywords for class-
 	show subjects
 		show timetable for those subjects
+

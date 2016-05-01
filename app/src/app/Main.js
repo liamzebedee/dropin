@@ -1,8 +1,3 @@
-/**
- * In this file, we create a React component
- * which incorporates components providedby material-ui.
- */
-
 import React from 'react';
 import RaisedButton from 'material-ui/RaisedButton';
 import Dialog from 'material-ui/Dialog';
@@ -21,15 +16,12 @@ import DropDownMenu from 'material-ui/DropDownMenu';
 
 import TextField from 'material-ui/TextField';
 
+import Paper from 'material-ui/Paper';
 
 
 import {List, ListItem} from 'material-ui/List';
 
-// import ActionInfo from 'material-ui/lib/svg-icons/action/info';
-// import Divider from 'material-ui/lib/divider';
-// import Subheader from 'material-ui/lib/Subheader';
-// import ActionAssignment from 'material-ui/lib/svg-icons/action/assignment';
-// import {blue500, yellow600} from 'material-ui/lib/styles/colors';
+
 
 import SelectField from 'material-ui/SelectField';
 
@@ -41,16 +33,57 @@ import {
   CardText
 } from 'material-ui/Card';
 
+import UTSSubjects from './subjects.json';
+
+function getSubjectNameForCode(code) {
+  var name = '';
+  UTSSubjects.forEach((subj) => {
+    if(subj.subjectCode == code) name = subj.subjectName;
+  })
+  return name;
+}
+function getSubjectCodeForName(name) {
+  var code = '';
+  UTSSubjects.forEach((subj) => {
+    if(subj.subjectName == name) code = subj.subjectCode;
+  })
+  return code;
+}
+
+
+var moment = require('moment');
+
+
+// var PouchDB = require('pouchdb');
+// PouchDB.plugin(require('pouchdb-load'));
+var UTSTimetable = require('./timetable.json');
+
+
+
+    const ClassTypes = {
+      "CNR": "Class Not Required",
+      "CMP": "Computer Lab",
+      "DRP": "Drop in",
+      "LAB": "Laboratory",
+      "LEC": "Lecture",
+      "PRC": "Practical or Practicum session",
+      "SEM": "Seminar",
+      "STU": "Studio",
+      "TUT": "Tutorial",
+      "UPS": "U:PASS session",
+      "WRK": "Workshop"
+    };
+
 
 const styles = {
   container: {
-    textAlign: 'center',
   },
 
   classLocation: {
   },
   classLocationBit: {
-    paddingRight: 5
+    paddingRight: 5,
+    fontWeight: 600
   }
 };
 
@@ -66,21 +99,26 @@ class ClassCard extends React.Component {
   }
 
   render() {
+    var classType = ClassTypes[this.props.classType.toUpperCase()];
+
+    const theHour = moment({hours: this.props.hour}).format('ha');
+    
+
     return (
     <Card>
       <CardHeader
-        title="Teaching English for Academic Purposes"
-        subtitle="Computer Lab"
+        title={this.props.subjectName}
+        subtitle={classType}
         actAsExpander={true}
         showExpandableButton={true}
       />
       <CardText expandable={true}>
-        <p>010039</p>
-        <p>10am - 1 hour</p>
+        <p>{this.props.subjectCode}</p>
+        <p>{theHour} - {this.props.howLong} mins</p>
         <p style={styles.classLocation}>
-          <span style={styles.classLocationBit}>CB11</span>
-          <span style={styles.classLocationBit}>B1</span>
-          <span style={styles.classLocationBit}>403</span>
+          <span style={styles.classLocationBit}>{this.props.building}</span>
+          <span style={styles.classLocationBit}>{this.props.level}</span>
+          <span style={styles.classLocationBit}>{this.props.room}</span>
         </p>
       </CardText>
     </Card>
@@ -90,24 +128,33 @@ class ClassCard extends React.Component {
 
 class SubjectCard extends React.Component {
   render() {
+    this.props.classes.sort((a, b) => {
+      return a.day - b.day;
+    })
+
+
     return (
     <Card>
       <CardHeader
-        title="Teaching English for Academic Purposes"
-        subtitle="Computer Lab"
+        title={this.props.subjectName}
+        subtitle={this.props.subjectCode}
         actAsExpander={true}
         showExpandableButton={true}
       />
       <CardText expandable={true}>
         <List>
-          <ListItem
-            primaryText="Monday 11am"
-            secondaryText="Seminar in CB05.04.039 - 1hr"
-          />
-          <ListItem
-            primaryText="Monday 2pm"
-            secondaryText="Lecture in CB05.04.039 - 2.5hr"
-          />
+          {this.props.classes.map((subjectClass) => {
+            var dateNice = moment({
+              hours: subjectClass.hour
+            }).isoWeekday(subjectClass.day).format('dddd ha');
+
+            var classType = ClassTypes[subjectClass.classType.toUpperCase()];
+
+            return <ListItem
+              primaryText={dateNice}
+              secondaryText={classType + " in " + subjectClass.location.join('.') + " - " + `${subjectClass.howLong}mins`}
+            />;
+          })}
         </List>
       </CardText>
     </Card>
@@ -126,7 +173,7 @@ class ResultsSection extends React.Component {
   }
 
   render() {
-    var note = this.props.results.length > 0 ? <h1>{this.props.results.length + ' results!'}</h1> : null;
+    var note = this.props.results.length > 0 ? <h2 style={{paddingLeft:15,paddingTop:10}}>{this.props.results.length + ' ' + this.props.unitOfMeasurement + '!'}</h2> : null;
     return (
       <div>
         {note}
@@ -140,11 +187,11 @@ class ResultsSection extends React.Component {
 }
 
 const UTSBuildings = `
-B11 - B11 (FEIT / cheese grater)
-B8 - B8 (brown paper bag)
-B1 - B1 (Tower)
-`.split('\n').filter((item) => !!item).map((item) => {
-  const [code, text] = item.split(' - ');
+CB11: B11 (FEIT / cheese grater)
+CB08: B8 (brown paper bag)
+CB01: B1 (Tower)
+`.split('\n').filter((item) => item).map((item) => {
+  const [code, text] = item.split(': ');
   return { code, text };
 });
 console.log(UTSBuildings)
@@ -158,20 +205,59 @@ class Main extends React.Component {
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
 
     this.state = {
-      searchNearbyResults: [1,2,3],
+      searchNearbyResults: [],
       buildingQuery: UTSBuildings[0].code,
 
       searchByTextQuery: '',
-      searchByTextResults: [1,1,1,1,1,1,1]
+      searchByTextResults: []
     };
   }
 
   searchNearby() {
+    // current day and hour
+    var date = new Date;
+    var day = date.getDay();
+    var hour = date.getHours();
+    var minutes = date.getMinutes();
+    var building = this.state.buildingQuery;
 
+    var results = [];
+
+    UTSTimetable.data.forEach((subject) => {
+      subject.classes.forEach((subjClass) => {
+        if(subjClass.day === day && subjClass.hour === hour && subjClass.building === building) {
+          results.push(Object.assign({ subjectName: getSubjectNameForCode(subject.subjectCode), subjectCode: subject.subjectCode }, subjClass))
+        }
+      });
+    })
+
+    this.setState({
+      searchNearbyResults: results
+    })
   }
 
   searchSubjectsByText() {
+    var fuzzy = require('fuzzy');
+    var results = fuzzy.filter(this.state.searchByTextQuery, UTSSubjects, {
+      extract: function(el) { return el.subjectName; }
+    });
 
+    // find a set of similar subjects
+    // filter down if we don't have them in this autumn semester
+    var subjects = results.map((item) => {
+      var subjectCode = item.original.subjectCode;
+
+      var subjectTimetable = UTSTimetable.data.find((timetableSubj) => {
+        return timetableSubj.subjectCode === subjectCode;
+      })
+
+
+      if(subjectTimetable.classes.length < 1) return null;
+
+      return Object.assign(item.original, subjectTimetable);
+    })
+
+    this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
   }
 
   handleRequestClose() {
@@ -193,11 +279,12 @@ class Main extends React.Component {
 
               <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
                 {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
+                <MenuItem value={null} primaryText={'None'}/>
               </DropDownMenu>
 
               <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
 
-              <ResultsSection results={this.state.searchNearbyResults} renderItem={(item) => <ClassCard {...item}/>}/>
+              <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item) => <ClassCard {...item}/>}/>
 
               </div>
             </Tab>
@@ -210,7 +297,7 @@ class Main extends React.Component {
                 <RaisedButton label="Search" primary={true} onClick={this.searchSubjectsByText}/>
 
 
-                <ResultsSection results={this.state.searchByTextResults} renderItem={(item) => <SubjectCard {...item}/>}/>
+                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item) => <SubjectCard {...item}/>}/>
 
               </div>
             </Tab>

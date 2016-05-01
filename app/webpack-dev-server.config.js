@@ -24,7 +24,7 @@ const config = {
     hot: true,        //Live-reload
     inline: true,
     port: 3000,        //Port Number
-    host: 'localhost',  //Change to '0.0.0.0' for external facing server
+    host: '0.0.0.0',  //Change to '0.0.0.0' for external facing server
   },
   devtool: 'eval',
   output: {
@@ -49,6 +49,10 @@ const config = {
         loaders: ['react-hot', 'babel-loader'], //react-hot is like browser sync and babel loads jsx and es6-7
         exclude: [nodeModulesPath],
       },
+      {
+        test: /\.json$/,
+        loader: 'json'
+      }
     ],
   },
   //eslint config options. Part of the eslint-loader package
