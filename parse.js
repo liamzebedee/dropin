@@ -4,26 +4,27 @@ var jq = require('jquery');
 
 var allClassesEVER = [];
 
+var timetableFile = process.argv[2];
+console.log(timetableFile);
+// 'rawtimetables/12311.html'
+var html = fs.readFileSync(timetableFile);
+// first argument can be html string, filename, or url
+// console.log(timetableFile);
 
-fs.readdirSync('rawtimetables/').forEach(function(file) {
-	var html = fs.readFileSync('rawtimetables/'+file);
-	// first argument can be html string, filename, or url
-	console.log(file);
+env({ html: html, done: function (errors, windowObj) {
+	if(errors) {
+		console.log(errors);
+		throw new Error();
+	}
+	getClassesFromTimetable(jq(windowObj));
 
-	env({ html: html, done: function (errors, windowObj) {
-		if(errors) {
-			console.log(errors);
-			throw new Error();
-		}
-		getClassesFromTimetable(jq(windowObj));
-
-	}});
-});
+	windowObj.close();
+}});
 
 
 
 function getClassesFromTimetable($) {
-	console.log('getting');
+	// console.log('getting');
 	var classes = [];
 	var mapFromDayToNumberofSlots = [];
 
@@ -48,7 +49,7 @@ function getClassesFromTimetable($) {
 				}
 			});
 
-			console.log(mapFromDayToNumberofSlots);
+			// console.log(mapFromDayToNumberofSlots);
 
 			return;
 		}
@@ -79,34 +80,30 @@ function getClassesFromTimetable($) {
 			// console.log(i);
 			var day = mapFromDayToNumberofSlots[i + skippedHeader];
 			var howLong = (0+z.prop('rowspan')) * 15; // in minutes
-			console.log(day + 'th day @ '+hour+':'+min+' for '+howLong+' minutes');
+			// console.log(day + 'th day @ '+hour+':'+min+' for '+howLong+' minutes');
 
-			// 0 = subject
-			// 1 = session
-			// 2 = location
-			// 3 = IDWTFTI
 
 			// 54064_AUT_U_1_S<br>Sem1, 02<br>CB10.05.330 <br>23/3-20/4, 4/5-8/6<br>
 
-			var classInfoSplitUpToBeProcessed = z.html().split('<br>');
-			var classTypeAndNumber = classInfoSplitUpToBeProcessed[1].split(', ')[0];
-			var classType;
-			switch(classTypeAndNumber[0]) {
-				case 'C':
-					classType = 'Cmp';
-					break;
-				case 'L':
-					classType = 'Lec';
-					break;
-				case 'T':
-					classType = 'Tut';
-					break;
-				default:
-					classType = classTypeAndNumber[0]+classTypeAndNumber[1]+classTypeAndNumber[2];
-					break;
+			var classInfo = z.html().split('<br>');
+			var info_subject = 0;
+			var info_session = 1;
+			var info_location = 2;
+
+			var classTypeAndNumber = classInfo[info_session].split(', ')[0];
+			var classType = ''+classTypeAndNumber[0]+classTypeAndNumber[1]+classTypeAndNumber[2];
+
+			var locationInfo = classInfo[info_location].trim();
+			if(locationInfo == '') {
+				return;
 			}
 
-			var classLocation = classInfoSplitUpToBeProcessed[2].trim().split('.');
+			var locations = classInfo[info_location].match(/C[a-zA-Z0-9][^\s]+/g);
+			if(!locations || !locations[0]) {
+				console.log(locationInfo)
+				throw new Error("Can't find full location for "+timetableFile);
+			}
+			var classLocation = locations[0].split('.');
 
 
 			var classInfo = {
@@ -118,7 +115,7 @@ function getClassesFromTimetable($) {
 				building: classLocation[0],
 				level: classLocation[1],
 				room: classLocation[2],
-				classType: classType
+				classType: classType,
 			};
 
 			classes.push(classInfo);
