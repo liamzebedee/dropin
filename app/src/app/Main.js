@@ -21,7 +21,7 @@ import Paper from 'material-ui/Paper';
 
 import {List, ListItem} from 'material-ui/List';
 
-
+import TimePicker from 'material-ui/TimePicker';
 
 import SelectField from 'material-ui/SelectField';
 
@@ -32,6 +32,12 @@ import {
   CardMedia,
   CardText
 } from 'material-ui/Card';
+
+import {
+  Toolbar,
+  ToolbarGroup,
+  ToolbarSeperator
+} from 'material-ui/Toolbar';
 
 import UTSSubjects from './subjects.json';
 
@@ -57,8 +63,6 @@ var moment = require('moment');
 // var PouchDB = require('pouchdb');
 // PouchDB.plugin(require('pouchdb-load'));
 var UTSTimetable = require('./timetable.json');
-
-
 
     const ClassTypes = {
       "CNR": "Class Not Required",
@@ -108,7 +112,7 @@ class ClassCard extends React.Component {
     <Card>
       <CardHeader
         title={this.props.subjectName}
-        subtitle={classType}
+        subtitle={`${theHour} - ${classType}`}
         actAsExpander={true}
         showExpandableButton={true}
       />
@@ -196,6 +200,17 @@ CB01: B1 (Tower)
 });
 console.log(UTSBuildings)
 
+
+// All for that sweet UX
+function roundTimeQuarterHour() {
+    var time = new Date;
+
+    time.setMilliseconds(Math.round(time.getMilliseconds() / 1000) * 1000);
+    time.setSeconds(Math.round(time.getSeconds() / 60) * 60);
+    time.setMinutes(Math.round(time.getMinutes() / 15) * 15);
+    return time;
+}
+
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
@@ -204,9 +219,11 @@ class Main extends React.Component {
     this.searchNearby = this.searchNearby.bind(this);
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
 
+
     this.state = {
       searchNearbyResults: [],
       buildingQuery: UTSBuildings[0].code,
+      currentTime: roundTimeQuarterHour(),
 
       searchByTextQuery: '',
       searchByTextResults: []
@@ -215,7 +232,7 @@ class Main extends React.Component {
 
   searchNearby() {
     // current day and hour
-    var date = new Date;
+    var date = this.state.currentTime;
     var day = date.getDay();
     var hour = date.getHours();
     var minutes = date.getMinutes();
@@ -277,15 +294,25 @@ class Main extends React.Component {
             <Tab label="Nearby" value={0}>
               <div>
 
-              <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
-                {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
-                <MenuItem value={null} primaryText={'None'}/>
-              </DropDownMenu>
+              <Toolbar>
+                <ToolbarGroup firstChild={true} float="left">
+                  <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
+                    {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.code}/>)}
+                    <MenuItem value={null} primaryText={'None'}/>
+                  </DropDownMenu>
 
-              <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
+                  <TimePicker
+                    value={this.state.currentTime}
+                    autoOk={true} textFieldStyle={{ width: 90 }}/>
+                </ToolbarGroup>
 
-              <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item) => <ClassCard {...item}/>}/>
 
+                <ToolbarGroup float="right">
+                  <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
+                </ToolbarGroup>
+              </Toolbar>
+
+              <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>}/>
               </div>
             </Tab>
 
@@ -297,7 +324,7 @@ class Main extends React.Component {
                 <RaisedButton label="Search" primary={true} onClick={this.searchSubjectsByText}/>
 
 
-                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item) => <SubjectCard {...item}/>}/>
+                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
 
               </div>
             </Tab>
