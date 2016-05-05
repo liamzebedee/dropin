@@ -39,6 +39,9 @@ import {
   ToolbarSeperator
 } from 'material-ui/Toolbar';
 
+import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
+import IconButton from 'material-ui/IconButton';
+
 import UTSSubjects from './subjects.json';
 
 function getSubjectNameForCode(code) {
@@ -147,14 +150,14 @@ class SubjectCard extends React.Component {
       />
       <CardText expandable={true}>
         <List>
-          {this.props.classes.map((subjectClass) => {
+          {this.props.classes.map((subjectClass, i) => {
             var dateNice = moment({
               hours: subjectClass.hour
             }).isoWeekday(subjectClass.day).format('dddd ha');
 
             var classType = ClassTypes[subjectClass.classType.toUpperCase()];
 
-            return <ListItem
+            return <ListItem key={i}
               primaryText={dateNice}
               secondaryText={classType + " in " + subjectClass.location.join('.') + " - " + `${subjectClass.howLong}mins`}
             />;
@@ -177,10 +180,10 @@ class ResultsSection extends React.Component {
   }
 
   render() {
-    var note = this.props.results.length > 0 ? <h2 style={{paddingLeft:15,paddingTop:10}}>{this.props.results.length + ' ' + this.props.unitOfMeasurement + '!'}</h2> : null;
+    var note = this.props.results.length > 0 ? this.props.results.length + ' ' + this.props.unitOfMeasurement + ' found!' : 'no results :-(';
     return (
       <div>
-        {note}
+        <h2 style={{paddingLeft:15,paddingTop:10}}>{note}</h2>
 
         <div>
           {this.props.results.map(this.props.renderItem)}
@@ -191,14 +194,27 @@ class ResultsSection extends React.Component {
 }
 
 const UTSBuildings = `
-CB11: B11 (FEIT / cheese grater)
-CB08: B8 (brown paper bag)
-CB01: B1 (Tower)
+CB11: FEIT
+CB10: Building 10
+
+CB07: B7 Health/Science
+CB06: B6 Science
+CB01: Tower
+CB02: Building 2
+
+CB03: B3 Arts
+CB04: B4 Science
+
+CB06: B6 Design Architecture (DAB)
+
+CB05: B5 Haymarket/Library
+
+CB08: Brown paper bag
 `.split('\n').filter((item) => item).map((item) => {
   const [code, text] = item.split(': ');
   return { code, text };
 });
-console.log(UTSBuildings)
+// console.log(UTSBuildings)
 
 
 // All for that sweet UX
@@ -214,13 +230,14 @@ function roundTimeQuarterHour() {
 class Main extends React.Component {
   constructor(props, context) {
     super(props, context);
-    this.handleRequestClose = this.handleRequestClose.bind(this);
-    this.handleTouchTap = this.handleTouchTap.bind(this);
     this.searchNearby = this.searchNearby.bind(this);
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
 
 
     this.state = {
+      aboutDialogOpen: false,
+
+
       searchNearbyResults: [],
       buildingQuery: UTSBuildings[0].code,
       currentTime: roundTimeQuarterHour(),
@@ -230,19 +247,23 @@ class Main extends React.Component {
     };
   }
 
+  updateCurrentTimeQuery(date) {
+    this.setState({ currentTime: date });
+  }
+
   searchNearby() {
     // current day and hour
-    var date = this.state.currentTime;
+    var date = new Date;
     var day = date.getDay();
-    var hour = date.getHours();
-    var minutes = date.getMinutes();
+    var hour = this.state.currentTime.getHours();
+    var minutes = this.state.currentTime.getMinutes();
     var building = this.state.buildingQuery;
 
     var results = [];
 
     UTSTimetable.data.forEach((subject) => {
       subject.classes.forEach((subjClass) => {
-        if(subjClass.day === day && subjClass.hour === hour && subjClass.building === building) {
+        if(subjClass.day === day && subjClass.hour === hour && subjClass.building.startsWith(building)) {
           results.push(Object.assign({ subjectName: getSubjectNameForCode(subject.subjectCode), subjectCode: subject.subjectCode }, subjClass))
         }
       });
@@ -276,19 +297,21 @@ class Main extends React.Component {
 
     this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
   }
-
-  handleRequestClose() {
-  }
-
-  handleTouchTap() {
-  }
   
   render() {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
+
         <div style={styles.container}>
+          <Dialog title="About" modal={false} open={this.state.aboutDialogOpen} onRequestClose={() => this.setState({ aboutDialogOpen: false })}>
+            <p>Don't be a drop out! Come drop in!</p>
+            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/run/fed by UTS</p>
+          </Dialog>
+
           <AppBar
-          title="Drop In @ UTS"/>
+          title="Drop In @ UTS"
+          iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}
+          />
 
           <Tabs>
             <Tab label="Nearby" value={0}>
@@ -297,12 +320,12 @@ class Main extends React.Component {
               <Toolbar>
                 <ToolbarGroup firstChild={true} float="left">
                   <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
-                    {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.code}/>)}
-                    <MenuItem value={null} primaryText={'None'}/>
+                    {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
                   </DropDownMenu>
 
                   <TimePicker
                     value={this.state.currentTime}
+                    onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
                     autoOk={true} textFieldStyle={{ width: 90 }}/>
                 </ToolbarGroup>
 
@@ -320,7 +343,7 @@ class Main extends React.Component {
             <Tab label="Search" value={1}>
               <div>
                 <TextField
-                  hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery}/>
+                  hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
                 <RaisedButton label="Search" primary={true} onClick={this.searchSubjectsByText}/>
 
 
