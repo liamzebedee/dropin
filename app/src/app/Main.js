@@ -63,23 +63,21 @@ function getSubjectCodeForName(name) {
 var moment = require('moment');
 
 
-// var PouchDB = require('pouchdb');
-// PouchDB.plugin(require('pouchdb-load'));
 var UTSTimetable = require('./timetable.json');
 
-    const ClassTypes = {
-      "CNR": "Class Not Required",
-      "CMP": "Computer Lab",
-      "DRP": "Drop in",
-      "LAB": "Laboratory",
-      "LEC": "Lecture",
-      "PRC": "Practical or Practicum session",
-      "SEM": "Seminar",
-      "STU": "Studio",
-      "TUT": "Tutorial",
-      "UPS": "U:PASS session",
-      "WRK": "Workshop"
-    };
+const ClassTypes = {
+  "CNR": "Class Not Required",
+  "CMP": "Computer Lab",
+  "DRP": "Drop in",
+  "LAB": "Laboratory",
+  "LEC": "Lecture",
+  "PRC": "Practical or Practicum session",
+  "SEM": "Seminar",
+  "STU": "Studio",
+  "TUT": "Tutorial",
+  "UPS": "U:PASS session",
+  "WRK": "Workshop"
+};
 
 
 const styles = {
@@ -198,12 +196,11 @@ CB11: FEIT
 CB10: Building 10
 
 CB07: B7 Health/Science
-CB06: B6 Science
+CB04: B4 Science
 CB01: Tower
 CB02: Building 2
 
 CB03: B3 Arts
-CB04: B4 Science
 
 CB06: B6 Design Architecture (DAB)
 
@@ -261,7 +258,7 @@ class Main extends React.Component {
 
     var results = [];
 
-    UTSTimetable.data.forEach((subject) => {
+    UTSTimetable.forEach((subject) => {
       subject.classes.forEach((subjClass) => {
         if(subjClass.day === day && subjClass.hour === hour && subjClass.building.startsWith(building)) {
           results.push(Object.assign({ subjectName: getSubjectNameForCode(subject.subjectCode), subjectCode: subject.subjectCode }, subjClass))
@@ -285,7 +282,7 @@ class Main extends React.Component {
     var subjects = results.map((item) => {
       var subjectCode = item.original.subjectCode;
 
-      var subjectTimetable = UTSTimetable.data.find((timetableSubj) => {
+      var subjectTimetable = UTSTimetable.find((timetableSubj) => {
         return timetableSubj.subjectCode === subjectCode;
       })
 
@@ -304,8 +301,8 @@ class Main extends React.Component {
 
         <div style={styles.container}>
           <Dialog title="About" modal={false} open={this.state.aboutDialogOpen} onRequestClose={() => this.setState({ aboutDialogOpen: false })}>
-            <p>Don't be a drop out! Come drop in!</p>
-            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/run/fed by UTS</p>
+            <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
+            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/sponsored/fed by UTS.</p>
           </Dialog>
 
           <AppBar
