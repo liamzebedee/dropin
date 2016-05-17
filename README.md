@@ -1,8 +1,15 @@
 dropin UTS
 ==========
 
- - `crawl.py` gets the HTML timetables for every subject
- - `parse.js` parses it using JQuery etc. into a JSON object
+Drop in to any subject at UTS, near you and search for ones too!
+
+Tech details:
+ - Chrome Dev Tools to produce curl commands to download timetable data
+ - JQuery to scrape and parse the subject numbers (`getSubjects.js`)
+ - Python and curl to download timetables (`crawl.py`)
+ - Node/JS with JQuery to interpret and parse timetable into JSON (`parse.js`)
+ - Some Bash to mash it all together (`extractFromTimetableData.sh`)
+ - Webpack + ES6 + React.js + Material UI for a frontend
 
 
 
@@ -22,18 +29,3 @@ MP.01.01
  1. `nvm install 6;nvm use 6 && nvm alias default 6`
  2. `npm install`
  3. `npm start`
-
-
-
-Near me:
-
-Filter by building code and level
-Tick: lectures, workshops/tutorials/computer lab, 
-
-
-Search subjects:
-
-Search by keywords for class-
-	show subjects
-		show timetable for those subjects
-

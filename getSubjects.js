@@ -1,0 +1,1 @@
+JSON.stringify($('.ie-images').html().split('<br>').map(function(el,i){ if(i==0 || i==3588) return; var data = $('<span>'+el+'</span>').text().replace(/(\r\n|\n|\r)/gm,"").split(' '); return { subjectCode: data.splice(0, 1)[0], subjectName: data.join(' ') }; }))
