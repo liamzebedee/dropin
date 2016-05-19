@@ -98,6 +98,19 @@ const muiTheme = getMuiTheme({
   },
 });
 
+// TODO I fucked up date parsing
+// Mine is zero-based, JS is one-based
+function convertFromMyBuggyDayToJSDay(day) {
+  return (day + 1);
+}
+function convertFromJSDayToMyBuggyDay(day) {
+  return (day - 1);
+}
+function convertFromMyBuggyHourToJSHour(hour) {
+  return hour - 1; // mine is one-based, JS is zero-based
+  // how did I do this twice??
+}
+
 class ClassCard extends React.Component {
   constructor(props) {
     super(props);
@@ -106,7 +119,10 @@ class ClassCard extends React.Component {
   render() {
     var classType = ClassTypes[this.props.classType.toUpperCase()];
 
-    const theHour = moment({hours: this.props.hour}).format('ha');
+    const theHour = moment({
+      hours: this.props.hour,
+      minutes: this.props.min
+    }).format('h.mma');
     
 
     return (
@@ -135,8 +151,7 @@ class SubjectCard extends React.Component {
   render() {
     this.props.classes.sort((a, b) => {
       return a.day - b.day;
-    })
-
+    });
 
     return (
     <Card>
@@ -149,9 +164,11 @@ class SubjectCard extends React.Component {
       <CardText expandable={true}>
         <List>
           {this.props.classes.map((subjectClass, i) => {
+
             var dateNice = moment({
-              hours: subjectClass.hour
-            }).isoWeekday(subjectClass.day).format('dddd ha');
+              hours: convertFromMyBuggyHourToJSHour(subjectClass.hour),
+              minutes: subjectClass.min
+            }).isoWeekday(convertFromMyBuggyDayToJSDay(subjectClass.day)).format('dddd h.mma');
 
             var classType = ClassTypes[subjectClass.classType.toUpperCase()];
 
@@ -166,11 +183,6 @@ class SubjectCard extends React.Component {
     );
   }
 }
-
- // <CardActions expandable={true}>
- //      <FlatButton label="Action1" />
- //      <FlatButton label="Action2" />
- //    </CardActions>
 
 class ResultsSection extends React.Component {
   constructor(props) {
@@ -202,9 +214,9 @@ CB02: Building 2
 
 CB03: B3 Arts
 
-CB06: B6 Design Architecture (DAB)
+CB06: B6 DAB
 
-CB05: B5 Haymarket/Library
+CB05: B5 Haymarket
 
 CB08: Brown paper bag
 `.split('\n').filter((item) => item).map((item) => {
@@ -251,7 +263,7 @@ class Main extends React.Component {
   searchNearby() {
     // current day and hour
     var date = new Date;
-    var day = date.getDay();
+    var day = convertFromJSDayToMyBuggyDay(date.getDay());
     var hour = this.state.currentTime.getHours();
     var minutes = this.state.currentTime.getMinutes();
     var building = this.state.buildingQuery;
@@ -260,11 +272,18 @@ class Main extends React.Component {
 
     UTSTimetable.forEach((subject) => {
       subject.classes.forEach((subjClass) => {
-        if(subjClass.day === day && subjClass.hour === hour && subjClass.building.startsWith(building)) {
-          results.push(Object.assign({ subjectName: getSubjectNameForCode(subject.subjectCode), subjectCode: subject.subjectCode }, subjClass))
+        if(subjClass.day === day && (subjClass.hour === hour || (subjClass.hour-1) === hour) && subjClass.building.startsWith(building)) {
+          results.push(Object.assign({ 
+            subjectName: getSubjectNameForCode(subject.subjectCode),
+            subjectCode: subject.subjectCode 
+          }, subjClass))
         }
       });
-    })
+    });
+
+    results.sort((a, b) => {
+      return a.hour - b.hour;
+    });
 
     this.setState({
       searchNearbyResults: results
@@ -324,10 +343,7 @@ class Main extends React.Component {
                     value={this.state.currentTime}
                     onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
                     autoOk={true} textFieldStyle={{ width: 90 }}/>
-                </ToolbarGroup>
 
-
-                <ToolbarGroup float="right">
                   <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
                 </ToolbarGroup>
               </Toolbar>
