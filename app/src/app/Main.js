@@ -107,7 +107,9 @@ function convertFromJSDayToMyBuggyDay(day) {
   return (day - 1);
 }
 function convertFromMyBuggyHourToJSHour(hour) {
-  return hour - 1; // mine is one-based, JS is zero-based
+  return hour; // TODO FIX LATER
+  // return hour - 1; 
+  // mine is one-based, JS is zero-based
   // how did I do this twice??
 }
 
