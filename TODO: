@@ -1,0 +1,9 @@
+TODO:
+
+ - write the parser to get subject sessions
+ - run this on a subject
+ - write the parser to extract the timetable data in the existing format from the new endpoint
+ - run this on a subject session
+ - connect up the subject session thing to the other pipe
+ - then test this together
+ 
