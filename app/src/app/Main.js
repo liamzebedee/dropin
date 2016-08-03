@@ -36,7 +36,7 @@ import {
 import {
   Toolbar,
   ToolbarGroup,
-  ToolbarSeperator
+  ToolbarSeparator
 } from 'material-ui/Toolbar';
 
 import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
@@ -262,6 +262,9 @@ class Main extends React.Component {
     this.setState({ currentTime: date });
   }
 
+
+
+
   searchNearby() {
     // current day and hour
     var date = new Date;
@@ -292,6 +295,8 @@ class Main extends React.Component {
     })
   }
 
+
+
   searchSubjectsByText() {
     var fuzzy = require('fuzzy');
     var results = fuzzy.filter(this.state.searchByTextQuery, UTSSubjects, {
@@ -315,6 +320,11 @@ class Main extends React.Component {
 
     this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
   }
+
+
+
+
+
   
   render() {
     return (
@@ -334,33 +344,39 @@ class Main extends React.Component {
           <Tabs>
             <Tab label="Nearby" value={0}>
               <div>
+                <Toolbar>
+                  <ToolbarGroup firstChild={true} float="left">
+                    <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
+                      {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
+                    </DropDownMenu>
 
-              <Toolbar>
-                <ToolbarGroup firstChild={true} float="left">
-                  <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
-                    {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
-                  </DropDownMenu>
+                    <TimePicker
+                      value={this.state.currentTime}
+                      onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
+                      autoOk={true} textFieldStyle={{ width: 90 }} />
 
-                  <TimePicker
-                    value={this.state.currentTime}
-                    onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
-                    autoOk={true} textFieldStyle={{ width: 90 }}/>
+                    <ToolbarSeparator/>
 
-                  <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
-                </ToolbarGroup>
-              </Toolbar>
+                    <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
+                  </ToolbarGroup>
+                </Toolbar>
 
-              <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>}/>
+                <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
               </div>
             </Tab>
 
 
             <Tab label="Search" value={1}>
               <div>
-                <TextField
-                  hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
-                <RaisedButton label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                <Toolbar>
+                  <ToolbarGroup firstChild={true} float="left">
+                    <TextField
+                      style={{ marginTop: '4px', paddingLeft: '12px' }}
+                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
 
+                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                  </ToolbarGroup>
+                </Toolbar>
 
                 <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
 

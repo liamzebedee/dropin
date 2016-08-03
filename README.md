@@ -11,6 +11,7 @@ Tech details:
  - Some Bash to mash it all together (`extractFromTimetableData.sh`)
  - Webpack + ES6 + React.js + Material UI for a frontend
 
+[Download the timetables from Dropbox here](https://dl.dropboxusercontent.com/u/47287832/uts%20timetables.zip)
 
 
 ## Other documentation of process

@@ -63,21 +63,26 @@ def download_timetable_for_subject_codes(subject, subject_codes):
 	# timetable_data = cmd('node 2_extract_subject_timetable.js '+file).strip().split(',')
 
 
-# now to get the times for all subjects
 def scrape_data():
 	subjects_file = open('subjects.json')
 	subject_data = json.load(subjects_file)
 	subject_i = 0
 	for subject in subject_data:
-		get_command_for_download_subject_session_timetable(subject['subjectCode'], subject_i)
-		
+		subject_code = subject['subjectCode']
+
+		sessions = get_sessions_for_subject_code(subject_code)
+		download_timetable_for_subject_codes(subject_code, sessions)
 		subject_i += 1
 
 	subjects_file.close()
 
+
+
 if __name__ == '__main__':
-	subject = '48023'
-	sessions = get_sessions_for_subject_code(subject)
-	download_timetable_for_subject_codes(subject, sessions)
+	# subject = '010039'
+	# sessions = get_sessions_for_subject_code(subject)
+	# download_timetable_for_subject_codes(subject, sessions)
 
+	# scrape_data()
 
+	# 
