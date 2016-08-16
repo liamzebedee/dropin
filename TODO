@@ -1,12 +1,16 @@
 TODO:
 
 - host the static app on a fast server
-- host the backend storage on a cloud service
-	- Mongo is cloud hosted
-	- api is hosted locally
-- Refactor the app to query the cloud hosted APIs (and fix CORS probably)
+- host the API backend 
+- connect them up in API.js
+
 - integrate analytics
 - integrate social sharing so it goes viral
+
+
+
+
+
 
 
 

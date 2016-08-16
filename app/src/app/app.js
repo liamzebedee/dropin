@@ -4,7 +4,7 @@ import injectTapEventPlugin from 'react-tap-event-plugin';
 import { Router, Route, Link, browserHistory, IndexRoute } from 'react-router'
 
 import { AppContainer, ShowSingleSubject, SearchSubjects, NearbyClasses } from './Main';
-
+import initAnalytics from './analytics';
 
 
 
@@ -19,6 +19,8 @@ injectTapEventPlugin();
 
 
 const NoMatch = () => <span>No match</span>;
+
+initAnalytics();
 
 
 ReactDOM.render((
