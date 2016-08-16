@@ -5,26 +5,16 @@ import {deepOrange500} from 'material-ui/styles/colors';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 import Tabs from 'material-ui/Tabs/Tabs';
 import Tab from 'material-ui/Tabs/Tab';
 import AppBar from 'material-ui/AppBar';
-
 import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
-
-
 import TextField from 'material-ui/TextField';
-
 import Paper from 'material-ui/Paper';
-
-
 import {List, ListItem} from 'material-ui/List';
-
 import TimePicker from 'material-ui/TimePicker';
-
 import SelectField from 'material-ui/SelectField';
-
 import {
   Card,
   CardActions,
@@ -32,17 +22,18 @@ import {
   CardMedia,
   CardText
 } from 'material-ui/Card';
-
 import {
   Toolbar,
   ToolbarGroup,
   ToolbarSeparator
 } from 'material-ui/Toolbar';
-
 import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
 import IconButton from 'material-ui/IconButton';
 
-import UTSSubjects from './subjects.json';
+
+import { Router, Route, Link, browserHistory } from 'react-router'
+
+
 
 function getSubjectNameForCode(code) {
   var name = '';
@@ -62,8 +53,6 @@ function getSubjectCodeForName(name) {
 
 var moment = require('moment');
 
-
-var UTSTimetable = require('./timetable.json');
 
 const ClassTypes = {
   "CNR": "Class Not Required",
@@ -97,21 +86,6 @@ const muiTheme = getMuiTheme({
     accent1Color: deepOrange500,
   },
 });
-
-// TODO I fucked up date parsing
-// Mine is zero-based, JS is one-based
-function convertFromMyBuggyDayToJSDay(day) {
-  return (day + 1);
-}
-function convertFromJSDayToMyBuggyDay(day) {
-  return (day - 1);
-}
-function convertFromMyBuggyHourToJSHour(hour) {
-  return hour; // TODO FIX LATER
-  // return hour - 1; 
-  // mine is one-based, JS is zero-based
-  // how did I do this twice??
-}
 
 class ClassCard extends React.Component {
   constructor(props) {
@@ -225,7 +199,6 @@ CB08: Brown paper bag
   const [code, text] = item.split(': ');
   return { code, text };
 });
-// console.log(UTSBuildings)
 
 
 // All for that sweet UX
@@ -238,7 +211,7 @@ function roundTimeQuarterHour() {
     return time;
 }
 
-class Main extends React.Component {
+export class MainView extends React.Component {
   constructor(props, context) {
     super(props, context);
     this.searchNearby = this.searchNearby.bind(this);
@@ -263,28 +236,10 @@ class Main extends React.Component {
   }
 
 
-
-
   searchNearby() {
     // current day and hour
     var date = new Date;
-    var day = convertFromJSDayToMyBuggyDay(date.getDay());
-    var hour = this.state.currentTime.getHours();
-    var minutes = this.state.currentTime.getMinutes();
-    var building = this.state.buildingQuery;
-
-    var results = [];
-
-    UTSTimetable.forEach((subject) => {
-      subject.classes.forEach((subjClass) => {
-        if(subjClass.day === day && (subjClass.hour === hour || (subjClass.hour-1) === hour) && subjClass.building.startsWith(building)) {
-          results.push(Object.assign({ 
-            subjectName: getSubjectNameForCode(subject.subjectCode),
-            subjectCode: subject.subjectCode 
-          }, subjClass))
-        }
-      });
-    });
+    // TODO
 
     results.sort((a, b) => {
       return a.hour - b.hour;
@@ -320,9 +275,6 @@ class Main extends React.Component {
 
     this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
   }
-
-
-
 
 
   
@@ -361,6 +313,8 @@ class Main extends React.Component {
                   </ToolbarGroup>
                 </Toolbar>
 
+                <li><Link to="/subjects/123">Sample subject link</Link></li>
+
                 <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
               </div>
             </Tab>
@@ -370,7 +324,7 @@ class Main extends React.Component {
               <div>
                 <Toolbar>
                   <ToolbarGroup firstChild={true} float="left">
-                    <TextField
+                    <TextField name='searchByTextQuery'
                       style={{ marginTop: '4px', paddingLeft: '12px' }}
                       hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
 
@@ -390,4 +344,20 @@ class Main extends React.Component {
   }
 }
 
-export default Main;
+export class AppView extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    return <div></div>;
+  }
+}
+
+export class ShowSingleSubject extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    return <div>xxxx</div>;
+  }
+}

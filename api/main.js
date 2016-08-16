@@ -1,6 +1,6 @@
 var MongoClient = require('mongodb').MongoClient;
 
-const MONGO_URL = "mongodb://104.154.60.237:27017/exampleDb";
+const MONGO_URL = "mongodb://146.148.94.128/";
 
 // Connect to the db
 MongoClient.connect(MONGO_URL, function(err, db) {
