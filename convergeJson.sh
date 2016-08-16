@@ -4,6 +4,7 @@ for filename in rawtimetables/*.json; do
 	number=$(echo $filename | grep -o '\<[[:digit:]]*')
 	#echo $number
 	echo -e {\"$number\": >> timetableData.json
+  echo $filename
 	cat $filename >> timetableData.json
 	echo '},' >> timetableData.json
 done

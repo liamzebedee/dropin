@@ -1,11 +1,17 @@
 var MongoClient = require('mongodb').MongoClient;
+var assert = require('assert');
 
-const MONGO_URL = "mongodb://104.154.60.237:27017/exampleDb";
+const MONGO_URL = "mongodb://test:password@ds161255.mlab.com:61255/dbdropin";
 
+var mongoDatabase;
 // Connect to the db
 MongoClient.connect(MONGO_URL, function(err, db) {
+
   if(!err) {
     console.log("We are connected");
+    mongoDatabase = db;
+  }else{
+    console.log("MongoDB connection error", err);
   }
 });
 
@@ -25,7 +31,7 @@ var router = express.Router();
 
 
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.json({ message: 'hooray! welcome to our api!' });
 });
 
 
@@ -40,14 +46,14 @@ router.get('/subjects/nearby', (req, res) => {
 		classType: "Tut"
 	};
 
-	// So MongoDB lets you do nested array queries. 
+	// So MongoDB lets you do nested array queries.
 	// http://stackoverflow.com/questions/12629692/querying-an-array-of-arrays-in-mongodb
 
 	// TODO: Sort
 	let results = subjects.find({
 		"sessions.classes": {
-			weeksOn: { 
-				$elemMatch: { $elemMatch: { startWeek: { $gte: now }, endWeek: { $lte: now } } } 
+			weeksOn: {
+				$elemMatch: { $elemMatch: { startWeek: { $gte: now }, endWeek: { $lte: now } } }
 			},
 			startingTime: { $gte: now.time },
 			day: now.day,
@@ -62,7 +68,7 @@ router.get('/subjects/nearby', (req, res) => {
 })
 
 router.get('/subjects/search', (req, res) => {
-	
+
 })
 
 
