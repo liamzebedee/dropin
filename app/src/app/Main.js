@@ -5,26 +5,16 @@ import {deepOrange500} from 'material-ui/styles/colors';
 import FlatButton from 'material-ui/FlatButton';
 import getMuiTheme from 'material-ui/styles/getMuiTheme';
 import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider';
-
 import Tabs from 'material-ui/Tabs/Tabs';
 import Tab from 'material-ui/Tabs/Tab';
 import AppBar from 'material-ui/AppBar';
-
 import MenuItem from 'material-ui/MenuItem';
 import DropDownMenu from 'material-ui/DropDownMenu';
-
-
 import TextField from 'material-ui/TextField';
-
 import Paper from 'material-ui/Paper';
-
-
 import {List, ListItem} from 'material-ui/List';
-
 import TimePicker from 'material-ui/TimePicker';
-
 import SelectField from 'material-ui/SelectField';
-
 import {
   Card,
   CardActions,
@@ -32,38 +22,21 @@ import {
   CardMedia,
   CardText
 } from 'material-ui/Card';
-
 import {
   Toolbar,
   ToolbarGroup,
   ToolbarSeparator
 } from 'material-ui/Toolbar';
-
 import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
 import IconButton from 'material-ui/IconButton';
 
-import UTSSubjects from './subjects.json';
 
-function getSubjectNameForCode(code) {
-  var name = '';
-  UTSSubjects.forEach((subj) => {
-    if(subj.subjectCode == code) name = subj.subjectName;
-  })
-  return name;
-}
-function getSubjectCodeForName(name) {
-  var code = '';
-  UTSSubjects.forEach((subj) => {
-    if(subj.subjectName == name) code = subj.subjectCode;
-  })
-  return code;
-}
+import { Router, Route, Link, browserHistory } from 'react-router'
+
 
 
 var moment = require('moment');
 
-
-var UTSTimetable = require('./timetable.json');
 
 const ClassTypes = {
   "CNR": "Class Not Required",
@@ -83,7 +56,6 @@ const ClassTypes = {
 const styles = {
   container: {
   },
-
   classLocation: {
   },
   classLocationBit: {
@@ -97,21 +69,6 @@ const muiTheme = getMuiTheme({
     accent1Color: deepOrange500,
   },
 });
-
-// TODO I fucked up date parsing
-// Mine is zero-based, JS is one-based
-function convertFromMyBuggyDayToJSDay(day) {
-  return (day + 1);
-}
-function convertFromJSDayToMyBuggyDay(day) {
-  return (day - 1);
-}
-function convertFromMyBuggyHourToJSHour(hour) {
-  return hour; // TODO FIX LATER
-  // return hour - 1; 
-  // mine is one-based, JS is zero-based
-  // how did I do this twice??
-}
 
 class ClassCard extends React.Component {
   constructor(props) {
@@ -225,7 +182,6 @@ CB08: Brown paper bag
   const [code, text] = item.split(': ');
   return { code, text };
 });
-// console.log(UTSBuildings)
 
 
 // All for that sweet UX
@@ -238,24 +194,64 @@ function roundTimeQuarterHour() {
     return time;
 }
 
-class Main extends React.Component {
-  constructor(props, context) {
-    super(props, context);
-    this.searchNearby = this.searchNearby.bind(this);
-    this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
 
 
+
+
+
+export class SearchSubjects extends React.Component {
+  constructor(props) {
+    super(props)
     this.state = {
-      aboutDialogOpen: false,
+      searchByTextQuery: '',
+      searchByTextResults: [],
+    }
+
+    this.searchSubjectsByText = this.searchSubjectsByText.bind(this)
+  }
 
 
+  searchSubjectsByText() {
+    this.setState({ searchByTextResults: [] });
+  }
+
+  render() {
+
+    let result;
+    if(!this.props.children) 
+      result = <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>;
+    else 
+      result = this.props.children;
+
+return <div>
+
+                <Toolbar>
+                  <ToolbarGroup firstChild={true} float="left">
+                    <TextField
+                      style={{ marginTop: '4px', paddingLeft: '12px' }}
+                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery'/>
+
+                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                  </ToolbarGroup>
+                </Toolbar>
+
+
+              </div>;
+  }
+}
+
+// <Link to="/subjects/123">Sample subject link</Link>
+
+export class NearbyClasses extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
       searchNearbyResults: [],
       buildingQuery: UTSBuildings[0].code,
       currentTime: roundTimeQuarterHour(),
+    }
 
-      searchByTextQuery: '',
-      searchByTextResults: []
-    };
+    this.searchNearby = this.searchNearby.bind(this)
   }
 
   updateCurrentTimeQuery(date) {
@@ -263,87 +259,16 @@ class Main extends React.Component {
   }
 
 
-
-
   searchNearby() {
-    // current day and hour
-    var date = new Date;
-    var day = convertFromJSDayToMyBuggyDay(date.getDay());
-    var hour = this.state.currentTime.getHours();
-    var minutes = this.state.currentTime.getMinutes();
-    var building = this.state.buildingQuery;
-
-    var results = [];
-
-    UTSTimetable.forEach((subject) => {
-      subject.classes.forEach((subjClass) => {
-        if(subjClass.day === day && (subjClass.hour === hour || (subjClass.hour-1) === hour) && subjClass.building.startsWith(building)) {
-          results.push(Object.assign({ 
-            subjectName: getSubjectNameForCode(subject.subjectCode),
-            subjectCode: subject.subjectCode 
-          }, subjClass))
-        }
-      });
-    });
-
-    results.sort((a, b) => {
-      return a.hour - b.hour;
-    });
-
     this.setState({
-      searchNearbyResults: results
+      searchNearbyResults: []
     })
   }
 
-
-
-  searchSubjectsByText() {
-    var fuzzy = require('fuzzy');
-    var results = fuzzy.filter(this.state.searchByTextQuery, UTSSubjects, {
-      extract: function(el) { return el.subjectName; }
-    });
-
-    // find a set of similar subjects
-    // filter down if we don't have them in this autumn semester
-    var subjects = results.map((item) => {
-      var subjectCode = item.original.subjectCode;
-
-      var subjectTimetable = UTSTimetable.find((timetableSubj) => {
-        return timetableSubj.subjectCode === subjectCode;
-      })
-
-
-      if(subjectTimetable.classes.length < 1) return null;
-
-      return Object.assign(item.original, subjectTimetable);
-    })
-
-    this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
-  }
-
-
-
-
-
-  
   render() {
-    return (
-      <MuiThemeProvider muiTheme={muiTheme}>
 
-        <div style={styles.container}>
-          <Dialog title="About" modal={false} open={this.state.aboutDialogOpen} onRequestClose={() => this.setState({ aboutDialogOpen: false })}>
-            <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
-            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/sponsored/fed by UTS.</p>
-          </Dialog>
-
-          <AppBar
-          title="Drop In @ UTS"
-          iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}
-          />
-
-          <Tabs>
-            <Tab label="Nearby" value={0}>
-              <div>
+return <div>
+                
                 <Toolbar>
                   <ToolbarGroup firstChild={true} float="left">
                     <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
@@ -362,25 +287,72 @@ class Main extends React.Component {
                 </Toolbar>
 
                 <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
-              </div>
+
+              </div>;
+  }
+}
+
+
+
+export class AppContainer extends React.Component {
+  constructor(props, context) {
+    super(props, context);
+
+    this.handleUserSwapTab = this.handleUserSwapTab.bind(this)
+
+
+    this.state = {
+      aboutDialogOpen: false,
+
+      currentTab: 'search'
+    };
+  }
+
+  componentDidMount() {
+    this.updateTabForRoute(this.props.location.pathname)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if(this.props.location.pathname !== nextProps.location.pathname)
+      this.updateTabForRoute(nextProps.location.pathname)
+  }
+
+  updateTabForRoute(route) {
+    if(route.startsWith('/search-subjects'))
+      this.setState({ currentTab: 'search-subjects' })
+    else if(route.startsWith('/nearby'))
+      this.setState({ currentTab: 'nearby' })
+  }
+
+  handleUserSwapTab(newTabName) {
+    // TODO BUG WITH FUCKING onChange in Material-UI (React) http://www.material-ui.com/#/components/Tabs
+    // It apparently forwards all the onChange events for all the child components here.
+    if(typeof(newTabName) !== 'string') return;
+    browserHistory.push(`/${newTabName}`);
+  }
+
+  
+  render() {
+    return (
+      <MuiThemeProvider muiTheme={muiTheme}>
+
+        <div style={styles.container}>
+          <Dialog title="About" modal={false} open={this.state.aboutDialogOpen} onRequestClose={() => this.setState({ aboutDialogOpen: false })}>
+            <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
+            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/sponsored/fed by UTS.</p>
+          </Dialog>
+
+          <AppBar
+          title="Drop In @ UTS"
+          iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}/>
+
+          <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab}>
+            <Tab label="Nearby" value={'nearby'}>
+              {this.props.children}
             </Tab>
 
-
-            <Tab label="Search" value={1}>
-              <div>
-                <Toolbar>
-                  <ToolbarGroup firstChild={true} float="left">
-                    <TextField
-                      style={{ marginTop: '4px', paddingLeft: '12px' }}
-                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
-
-                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
-                  </ToolbarGroup>
-                </Toolbar>
-
-                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
-
-              </div>
+            <Tab label="Search" value={'search-subjects'}>
+              {this.props.children}
             </Tab>
           </Tabs>
         </div>
@@ -390,4 +362,11 @@ class Main extends React.Component {
   }
 }
 
-export default Main;
+export class ShowSingleSubject extends React.Component {
+  constructor(props) {
+    super(props)
+  }
+  render() {
+    return <div>xxxx</div>;
+  }
+}

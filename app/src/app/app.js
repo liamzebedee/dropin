@@ -1,14 +1,38 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import injectTapEventPlugin from 'react-tap-event-plugin';
-import Main from './Main'; // Our custom react component
+import { Router, Route, Link, browserHistory, IndexRoute } from 'react-router'
 
-//Needed for onTouchTap
-//Can go away when react 1.0 release
-//Check this repo:
-//https://github.com/zilverline/react-tap-event-plugin
+import { AppContainer, ShowSingleSubject, SearchSubjects, NearbyClasses } from './Main';
+
+
+
+
+// Needed for onTouchTap
+// Can go away when react 1.0 release
+// Check this repo:
+// https://github.com/zilverline/react-tap-event-plugin
 injectTapEventPlugin();
 
-// Render the main app react component into the app div.
-// For more details see: https://facebook.github.io/react/docs/top-level-api.html#react.render
-ReactDOM.render(<Main />, document.getElementById('app'));
+
+
+
+
+const NoMatch = () => <span>No match</span>;
+
+
+ReactDOM.render((
+  <Router history={browserHistory}>
+    <Route path="/" component={AppContainer}>
+    	<Route path="search-subjects(/:searchQuery)" component={SearchSubjects}>
+	      <Route path="subjects/:id" component={ShowSingleSubject}/>
+    	</Route>
+	  
+    	<Route path="nearby(/:location)" component={NearbyClasses}/>
+
+      <Route path="*" component={NoMatch}/>
+    </Route>
+  </Router>
+), document.getElementById('app')) 
+
+// <IndexRoute component={MainView} />
