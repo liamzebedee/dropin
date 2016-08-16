@@ -35,23 +35,6 @@ import { Router, Route, Link, browserHistory } from 'react-router'
 
 
 
-
-function getSubjectNameForCode(code) {
-  var name = '';
-  UTSSubjects.forEach((subj) => {
-    if(subj.subjectCode == code) name = subj.subjectName;
-  })
-  return name;
-}
-function getSubjectCodeForName(name) {
-  var code = '';
-  UTSSubjects.forEach((subj) => {
-    if(subj.subjectName == name) code = subj.subjectCode;
-  })
-  return code;
-}
-
-
 var moment = require('moment');
 
 
@@ -73,7 +56,6 @@ const ClassTypes = {
 const styles = {
   container: {
   },
-
   classLocation: {
   },
   classLocationBit: {
@@ -212,40 +194,53 @@ function roundTimeQuarterHour() {
     return time;
 }
 
+
+
+
+
+
 export class SearchSubjects extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-
       searchByTextQuery: '',
       searchByTextResults: [],
     }
+
+    this.searchSubjectsByText = this.searchSubjectsByText.bind(this)
   }
+
+
+  searchSubjectsByText() {
+    this.setState({ searchByTextResults: [] });
+  }
+
   render() {
 
+    let result;
+    if(!this.props.children) 
+      result = <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>;
+    else 
+      result = this.props.children;
 
 return <div>
 
-
                 <Toolbar>
                   <ToolbarGroup firstChild={true} float="left">
-                    <TextField name='searchByTextQuery'
+                    <TextField
                       style={{ marginTop: '4px', paddingLeft: '12px' }}
-                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
+                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery'/>
 
                     <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
                   </ToolbarGroup>
                 </Toolbar>
 
-                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
-
-
 
               </div>;
-
-
   }
 }
+
+// <Link to="/subjects/123">Sample subject link</Link>
 
 export class NearbyClasses extends React.Component {
   constructor(props) {
@@ -255,7 +250,21 @@ export class NearbyClasses extends React.Component {
       buildingQuery: UTSBuildings[0].code,
       currentTime: roundTimeQuarterHour(),
     }
+
+    this.searchNearby = this.searchNearby.bind(this)
   }
+
+  updateCurrentTimeQuery(date) {
+    this.setState({ currentTime: date });
+  }
+
+
+  searchNearby() {
+    this.setState({
+      searchNearbyResults: []
+    })
+  }
+
   render() {
 
 return <div>
@@ -277,15 +286,9 @@ return <div>
                   </ToolbarGroup>
                 </Toolbar>
 
-                <li><Link to="/subjects/123">Sample subject link</Link></li>
-
                 <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
 
-
               </div>;
-
-
-
   }
 }
 
@@ -295,12 +298,6 @@ export class AppContainer extends React.Component {
   constructor(props, context) {
     super(props, context);
 
-
-    this.searchNearby = this.searchNearby.bind(this);
-    this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
-
-
-    this.handleTabChange = this.handleTabChange.bind(this)
     this.handleUserSwapTab = this.handleUserSwapTab.bind(this)
 
 
@@ -316,70 +313,23 @@ export class AppContainer extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.updateTabForRoute(nextProps.location.pathname)
+    if(this.props.location.pathname !== nextProps.location.pathname)
+      this.updateTabForRoute(nextProps.location.pathname)
   }
 
   updateTabForRoute(route) {
-    switch(route) {
-      case '/search-subjects':
-        this.setState({ currentTab: 'search-subjects' })
-        break;
-      case '/nearby':
-        this.setState({ currentTab: 'nearby' })
-        break;
-    }
+    if(route.startsWith('/search-subjects'))
+      this.setState({ currentTab: 'search-subjects' })
+    else if(route.startsWith('/nearby'))
+      this.setState({ currentTab: 'nearby' })
   }
-
-  updateCurrentTimeQuery(date) {
-    this.setState({ currentTime: date });
-  }
-
-
-  searchNearby() {
-    // current day and hour
-    var date = new Date;
-    // TODO
-
-    results.sort((a, b) => {
-      return a.hour - b.hour;
-    });
-
-    this.setState({
-      searchNearbyResults: results
-    })
-  }
-
-  handleTabChange() {}
 
   handleUserSwapTab(newTabName) {
+    // TODO BUG WITH FUCKING onChange in Material-UI (React) http://www.material-ui.com/#/components/Tabs
+    // It apparently forwards all the onChange events for all the child components here.
+    if(typeof(newTabName) !== 'string') return;
     browserHistory.push(`/${newTabName}`);
   }
-
-
-  searchSubjectsByText() {
-    var fuzzy = require('fuzzy');
-    var results = fuzzy.filter(this.state.searchByTextQuery, UTSSubjects, {
-      extract: function(el) { return el.subjectName; }
-    });
-
-    // find a set of similar subjects
-    // filter down if we don't have them in this autumn semester
-    var subjects = results.map((item) => {
-      var subjectCode = item.original.subjectCode;
-
-      var subjectTimetable = UTSTimetable.find((timetableSubj) => {
-        return timetableSubj.subjectCode === subjectCode;
-      })
-
-
-      if(subjectTimetable.classes.length < 1) return null;
-
-      return Object.assign(item.original, subjectTimetable);
-    })
-
-    this.setState({ searchByTextResults: subjects.filter((el) => el).splice(0, 50) });
-  }
-
 
   
   render() {
@@ -396,11 +346,10 @@ export class AppContainer extends React.Component {
           title="Drop In @ UTS"
           iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}/>
 
-          <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab} >
+          <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab}>
             <Tab label="Nearby" value={'nearby'}>
               {this.props.children}
             </Tab>
-
 
             <Tab label="Search" value={'search-subjects'}>
               {this.props.children}
@@ -410,15 +359,6 @@ export class AppContainer extends React.Component {
 
       </MuiThemeProvider>
     );
-  }
-}
-
-export class AppView extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-  render() {
-    return <div></div>;
   }
 }
 
