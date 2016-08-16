@@ -29,11 +29,11 @@ import {
 } from 'material-ui/Toolbar';
 import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
 import IconButton from 'material-ui/IconButton';
-
+import FontIcon from 'material-ui/FontIcon';
 
 import { Router, Route, Link, browserHistory } from 'react-router'
 
-
+import API from './API';
 
 var moment = require('moment');
 
@@ -210,9 +210,9 @@ export class SearchSubjects extends React.Component {
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this)
   }
 
-
   searchSubjectsByText() {
-    this.setState({ searchByTextResults: [] });
+    let results = API.searchSubjectsByText(this.state.searchByTextQuery);
+    this.setState({ searchByTextResults: results });
   }
 
   render() {
@@ -223,16 +223,19 @@ export class SearchSubjects extends React.Component {
     else 
       result = this.props.children;
 
-return <div>
-
+        return <div>
                 <Toolbar>
-                  <ToolbarGroup firstChild={true} float="left">
+                  <ToolbarGroup firstChild={true}>
+                    <FontIcon className="material-icons">search</FontIcon>
                     <TextField
-                      style={{ marginTop: '4px', paddingLeft: '12px' }}
-                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery'/>
-
-                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                      hintText="Keywords, code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery' style={{ 
+                          width: 200,
+                          display: 'inline'
+                        }}/>
                   </ToolbarGroup>
+                  <ToolbarGroup>
+                    <RaisedButton label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                    </ToolbarGroup>
                 </Toolbar>
 
 
@@ -251,17 +254,29 @@ export class NearbyClasses extends React.Component {
       currentTime: roundTimeQuarterHour(),
     }
 
+    this.changeBuildingQuery = this.changeBuildingQuery.bind(this)
+    this.changeCurrentTime = this.changeCurrentTime.bind(this)
     this.searchNearby = this.searchNearby.bind(this)
   }
 
-  updateCurrentTimeQuery(date) {
-    this.setState({ currentTime: date });
+  changeBuildingQuery(event, index, value) {
+     this.setState({ buildingQuery: value })
+
+     this.searchNearby();
   }
 
+  changeCurrentTime(ev, date) {
+    this.updateCurrentTimeQuery(date)
+    this.setState({ currentTime: date });
+
+    this.searchNearby();
+  }
 
   searchNearby() {
+    let results = API.searchNearbyClasses(this.state.buildingQuery, this.state.currentTime);
+
     this.setState({
-      searchNearbyResults: []
+      searchNearbyResults: results
     })
   }
 
@@ -269,22 +284,34 @@ export class NearbyClasses extends React.Component {
 
 return <div>
                 
-                <Toolbar>
-                  <ToolbarGroup firstChild={true} float="left">
-                    <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
+                
+                <Toolbar noGutter={true}>
+
+                  <ToolbarGroup firstChild={false}>
+                    
+                    <FontIcon className="material-icons">place</FontIcon>
+                    <DropDownMenu value={this.state.buildingQuery} onChange={this.changeBuildingQuery} fullWidth={true} >
                       {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
                     </DropDownMenu>
-
-                    <TimePicker
-                      value={this.state.currentTime}
-                      onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
-                      autoOk={true} textFieldStyle={{ width: 90 }} />
-
-                    <ToolbarSeparator/>
-
-                    <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
                   </ToolbarGroup>
+
+                  <ToolbarGroup lastChild={true}>
+                      <FontIcon className="material-icons">alarm</FontIcon>
+                      <TimePicker
+                        name='time'
+                        value={this.state.currentTime}
+                        onChange={this.changeCurrentTime}
+                        autoOk={true} 
+                        textFieldStyle={{ 
+                          width: 90,
+                          display: 'inline'
+                        }}/>
+                  </ToolbarGroup>
+
                 </Toolbar>
+
+                
+
 
                 <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
 

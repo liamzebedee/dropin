@@ -5,7 +5,6 @@ TODO:
 	- Mongo is cloud hosted
 	- api is hosted locally
 - Refactor the app to query the cloud hosted APIs (and fix CORS probably)
-- Refactor the app UI so it's prettier
 - integrate analytics
 - integrate social sharing so it goes viral
 
