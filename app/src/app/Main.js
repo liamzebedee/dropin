@@ -35,6 +35,7 @@ import { Router, Route, Link, browserHistory } from 'react-router'
 
 
 
+
 function getSubjectNameForCode(code) {
   var name = '';
   UTSSubjects.forEach((subj) => {
@@ -211,24 +212,122 @@ function roundTimeQuarterHour() {
     return time;
 }
 
-export class MainView extends React.Component {
+export class SearchSubjects extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+
+      searchByTextQuery: '',
+      searchByTextResults: [],
+    }
+  }
+  render() {
+
+
+return <div>
+
+
+                <Toolbar>
+                  <ToolbarGroup firstChild={true} float="left">
+                    <TextField name='searchByTextQuery'
+                      style={{ marginTop: '4px', paddingLeft: '12px' }}
+                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
+
+                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
+                  </ToolbarGroup>
+                </Toolbar>
+
+                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
+
+
+
+              </div>;
+
+
+  }
+}
+
+export class NearbyClasses extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      searchNearbyResults: [],
+      buildingQuery: UTSBuildings[0].code,
+      currentTime: roundTimeQuarterHour(),
+    }
+  }
+  render() {
+
+return <div>
+                
+                <Toolbar>
+                  <ToolbarGroup firstChild={true} float="left">
+                    <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
+                      {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
+                    </DropDownMenu>
+
+                    <TimePicker
+                      value={this.state.currentTime}
+                      onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
+                      autoOk={true} textFieldStyle={{ width: 90 }} />
+
+                    <ToolbarSeparator/>
+
+                    <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
+                  </ToolbarGroup>
+                </Toolbar>
+
+                <li><Link to="/subjects/123">Sample subject link</Link></li>
+
+                <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
+
+
+              </div>;
+
+
+
+  }
+}
+
+
+
+export class AppContainer extends React.Component {
   constructor(props, context) {
     super(props, context);
+
+
     this.searchNearby = this.searchNearby.bind(this);
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this);
+
+
+    this.handleTabChange = this.handleTabChange.bind(this)
+    this.handleUserSwapTab = this.handleUserSwapTab.bind(this)
 
 
     this.state = {
       aboutDialogOpen: false,
 
-
-      searchNearbyResults: [],
-      buildingQuery: UTSBuildings[0].code,
-      currentTime: roundTimeQuarterHour(),
-
-      searchByTextQuery: '',
-      searchByTextResults: []
+      currentTab: 'search'
     };
+  }
+
+  componentDidMount() {
+    this.updateTabForRoute(this.props.location.pathname)
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.updateTabForRoute(nextProps.location.pathname)
+  }
+
+  updateTabForRoute(route) {
+    switch(route) {
+      case '/search-subjects':
+        this.setState({ currentTab: 'search-subjects' })
+        break;
+      case '/nearby':
+        this.setState({ currentTab: 'nearby' })
+        break;
+    }
   }
 
   updateCurrentTimeQuery(date) {
@@ -250,6 +349,11 @@ export class MainView extends React.Component {
     })
   }
 
+  handleTabChange() {}
+
+  handleUserSwapTab(newTabName) {
+    browserHistory.push(`/${newTabName}`);
+  }
 
 
   searchSubjectsByText() {
@@ -290,51 +394,16 @@ export class MainView extends React.Component {
 
           <AppBar
           title="Drop In @ UTS"
-          iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}
-          />
+          iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}/>
 
-          <Tabs>
-            <Tab label="Nearby" value={0}>
-              <div>
-                <Toolbar>
-                  <ToolbarGroup firstChild={true} float="left">
-                    <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
-                      {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
-                    </DropDownMenu>
-
-                    <TimePicker
-                      value={this.state.currentTime}
-                      onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
-                      autoOk={true} textFieldStyle={{ width: 90 }} />
-
-                    <ToolbarSeparator/>
-
-                    <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
-                  </ToolbarGroup>
-                </Toolbar>
-
-                <li><Link to="/subjects/123">Sample subject link</Link></li>
-
-                <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
-              </div>
+          <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab} >
+            <Tab label="Nearby" value={'nearby'}>
+              {this.props.children}
             </Tab>
 
 
-            <Tab label="Search" value={1}>
-              <div>
-                <Toolbar>
-                  <ToolbarGroup firstChild={true} float="left">
-                    <TextField name='searchByTextQuery'
-                      style={{ marginTop: '4px', paddingLeft: '12px' }}
-                      hintText="Keywords, subject code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} key={'searchByTextQuery'}/>
-
-                    <RaisedButton style={{ margin: '10px 8px' }} label="Search" primary={true} onClick={this.searchSubjectsByText}/>
-                  </ToolbarGroup>
-                </Toolbar>
-
-                <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>
-
-              </div>
+            <Tab label="Search" value={'search-subjects'}>
+              {this.props.children}
             </Tab>
           </Tabs>
         </div>

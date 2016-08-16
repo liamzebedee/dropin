@@ -1,1 +1,6 @@
-export default const AppContainer = (props) => <div>{props.children}</div>;
+export default const XXXX extends React.Component {
+	render() {
+
+	}
+}
+
