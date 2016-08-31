@@ -52,7 +52,6 @@ const ClassTypes = {
   "WRK": "Workshop"
 };
 
-
 const styles = {
   container: {
   },
@@ -70,78 +69,6 @@ const muiTheme = getMuiTheme({
   },
 });
 
-class ClassCard extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render() {
-    var classType = ClassTypes[this.props.classType.toUpperCase()];
-
-    const theHour = moment({
-      hours: this.props.hour,
-      minutes: this.props.min
-    }).format('h.mma');
-    
-
-    return (
-    <Card>
-      <CardHeader
-        title={this.props.subjectName}
-        subtitle={`${theHour} - ${classType}`}
-        actAsExpander={true}
-        showExpandableButton={true}
-      />
-      <CardText expandable={true}>
-        <p>{this.props.subjectCode}</p>
-        <p>{theHour} - {this.props.howLong} mins</p>
-        <p style={styles.classLocation}>
-          <span style={styles.classLocationBit}>{this.props.building}</span>
-          <span style={styles.classLocationBit}>{this.props.level}</span>
-          <span style={styles.classLocationBit}>{this.props.room}</span>
-        </p>
-      </CardText>
-    </Card>
-    );
-  }
-}
-
-class SubjectCard extends React.Component {
-  render() {
-    this.props.classes.sort((a, b) => {
-      return a.day - b.day;
-    });
-
-    return (
-    <Card>
-      <CardHeader
-        title={this.props.subjectName}
-        subtitle={this.props.subjectCode}
-        actAsExpander={true}
-        showExpandableButton={true}
-      />
-      <CardText expandable={true}>
-        <List>
-          {this.props.classes.map((subjectClass, i) => {
-
-            var dateNice = moment({
-              hours: convertFromMyBuggyHourToJSHour(subjectClass.hour),
-              minutes: subjectClass.min
-            }).isoWeekday(convertFromMyBuggyDayToJSDay(subjectClass.day)).format('dddd h.mma');
-
-            var classType = ClassTypes[subjectClass.classType.toUpperCase()];
-
-            return <ListItem key={i}
-              primaryText={dateNice}
-              secondaryText={classType + " in " + subjectClass.location.join('.') + " - " + `${subjectClass.howLong}mins`}
-            />;
-          })}
-        </List>
-      </CardText>
-    </Card>
-    );
-  }
-}
 
 class ResultsSection extends React.Component {
   constructor(props) {
@@ -183,7 +110,6 @@ CB08: Brown paper bag
   return { code, text };
 });
 
-
 // All for that sweet UX
 function roundTimeQuarterHour() {
     var time = new Date;
@@ -195,19 +121,23 @@ function roundTimeQuarterHour() {
 }
 
 
-
-
-
+// -------------------
+// Search for subjects
+// -------------------
 
 export class SearchSubjects extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      searchByTextQuery: '',
+      searchByTextQuery: this.props.location.query['searchQuery'] || '',
       searchByTextResults: [],
     }
 
     this.searchSubjectsByText = this.searchSubjectsByText.bind(this)
+  }
+
+  componentDidMount() {
+    if(this.state.searchByTextQuery != '') this.searchSubjectsByText();
   }
 
   searchSubjectsByText() {
@@ -216,7 +146,6 @@ export class SearchSubjects extends React.Component {
   }
 
   render() {
-
     let result;
     if(!this.props.children) 
       result = <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>;
@@ -238,12 +167,51 @@ export class SearchSubjects extends React.Component {
                     </ToolbarGroup>
                 </Toolbar>
 
-
+                {result}
               </div>;
   }
 }
 
-// <Link to="/subjects/123">Sample subject link</Link>
+class SubjectCard extends React.Component {
+  render() {
+    this.props.classes.sort((a, b) => {
+      return a.day - b.day;
+    });
+
+    return (
+    <Card>
+      <CardHeader
+        title={this.props.subjectName}
+        subtitle={this.props.subjectCode}
+        actAsExpander={true}
+        showExpandableButton={true}
+      />
+      <CardText expandable={true}>
+        <List>
+          {this.props.classes.map((subjectClass, i) => {
+
+            var dateNice = moment({
+              hours: subjectClass.hour,
+              minutes: subjectClass.min
+            }).isoWeekday(subjectClass.day).format('dddd h.mma');
+
+            var classType = ClassTypes[subjectClass.classType.toUpperCase()];
+
+            return <ListItem key={i}
+              primaryText={dateNice}
+              secondaryText={classType + " in " + subjectClass.location.join('.') + " - " + `${subjectClass.howLong}mins`}
+            />;
+          })}
+        </List>
+      </CardText>
+    </Card>
+    );
+  }
+}
+
+// ---------------
+// Nearby subjects
+// ---------------
 
 export class NearbyClasses extends React.Component {
   constructor(props) {
@@ -257,6 +225,10 @@ export class NearbyClasses extends React.Component {
     this.changeBuildingQuery = this.changeBuildingQuery.bind(this)
     this.changeCurrentTime = this.changeCurrentTime.bind(this)
     this.searchNearby = this.searchNearby.bind(this)
+  }
+
+  componentDidMount() {
+    this.searchNearby();
   }
 
   changeBuildingQuery(event, index, value) {
@@ -281,10 +253,7 @@ export class NearbyClasses extends React.Component {
   }
 
   render() {
-
-return <div>
-                
-                
+    return <div>         
                 <Toolbar noGutter={true}>
 
                   <ToolbarGroup firstChild={false}>
@@ -319,6 +288,74 @@ return <div>
   }
 }
 
+class ClassCard extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render() {
+    var classType = ClassTypes[this.props.classType.toUpperCase()];
+
+    const theHour = moment({
+      hours: this.props.hour,
+      minutes: this.props.min
+    }).format('h.mma');
+    
+
+    return (
+    <Card>
+      <CardHeader
+        title={this.props.subjectName}
+        subtitle={`${theHour} - ${classType}`}
+        actAsExpander={true}
+        showExpandableButton={true}
+      />
+      <CardText expandable={true}>
+        <p>{this.props.subjectCode}</p>
+        <p>{theHour} - {this.props.howLong} mins</p>
+        <p style={styles.classLocation}>
+          <span style={styles.classLocationBit}>{this.props.building}</span>
+          <span style={styles.classLocationBit}>{this.props.level}</span>
+          <span style={styles.classLocationBit}>{this.props.room}</span>
+        </p>
+      </CardText>
+    </Card>
+    );
+  }
+}
+
+// -------------------
+// Show single subject
+// -------------------
+
+export class ShowSingleSubject extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {}
+  }
+
+  componentDidMount() {
+    let info = API.getSubjectInfo(this.props.id);
+    this.setState({ subject: info })
+  }
+
+  render() {
+    if(!this.state.subject) {
+      return <div>Loading</div>;
+    }
+
+    return <div>
+      <SubjectCard {...subject}/>
+    </div>;
+  }
+}
+
+
+
+
+
+
+// <Link to="/subjects/123">Sample subject link</Link>
 
 
 export class AppContainer extends React.Component {
@@ -386,14 +423,5 @@ export class AppContainer extends React.Component {
 
       </MuiThemeProvider>
     );
-  }
-}
-
-export class ShowSingleSubject extends React.Component {
-  constructor(props) {
-    super(props)
-  }
-  render() {
-    return <div>xxxx</div>;
   }
 }

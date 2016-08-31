@@ -1,13 +1,16 @@
 TODO:
 
-- host the static app on a fast server
+
+
+
+
 - host the API backend 
 - connect them up in API.js
 
 - integrate analytics
 - integrate social sharing so it goes viral
-
-
+- integrate rating of subjects
+- integrate the feedback mechanism
 
 
 
@@ -40,7 +43,20 @@ Plan:
 
 
 
+<ToolbarGroup firstChild={true} float="left">
+  <DropDownMenu value={this.state.buildingQuery} onChange={(event, index, value) => this.setState({ buildingQuery: value })}>
+    {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
+  </DropDownMenu>
 
+  <TimePicker
+    value={this.state.currentTime}
+    onChange={(ev, date) => this.updateCurrentTimeQuery(date)}
+    autoOk={true} textFieldStyle={{ width: 90 }} />
+
+  <ToolbarSeparator/>
+
+  <RaisedButton label="Search" primary={true} onClick={this.searchNearby}/>
+</ToolbarGroup>
 
 
 
