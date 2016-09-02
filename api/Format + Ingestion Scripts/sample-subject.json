@@ -1,0 +1,24 @@
+ {
+  "subjectId":"77901",
+  "sessions":[
+    {
+      "sessionName":"77901_AUT_U_1_S",
+      "classes":[
+        {"startingTime":"2016-08-04T18:00:00+10:00",
+        "durationInMins":180,"endTime":"2016-08-04T21:00:00+10:00",
+        "day":3,
+        "location":"CB05B.03.018",
+        "building":"CB05B",
+        "level":"03",
+        "room":"018",
+        "classType":"Lec",
+        "weeksOn":[
+          ["2016-02-25T13:00:00.000Z","2016-04-08T14:00:00.000Z"],
+          ["2016-04-29T14:00:00.000Z","2016-05-27T14:00:00.000Z"]
+        ]
+      }
+    ]
+    }
+  ],
+  "subjectName":"Some Subject"
+}
