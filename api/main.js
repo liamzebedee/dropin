@@ -7,7 +7,6 @@ const MONGO_URL = "mongodb://test:password@ds161255.mlab.com:61255/dbdropin";
 var mongoDatabase;
 // Connect to the db
 MongoClient.connect(MONGO_URL, function(err, db) {
-
   if(!err) {
     console.log("We are connected");
     mongoDatabase = db;
@@ -32,51 +31,55 @@ var router = express.Router();
 
 
 router.get('/', function(req, res) {
-    res.json({ message: 'hooray! welcome to our api!' });
+  res.json({ message: 'hooray! welcome to our api!' });
 });
 
 
 router.get('/subjects/nearby', (req, res) => {
 
-	let nowDate = new Date();
-	let today = nowDate.day;
-	let theTime = nowDate.time;
-
+	let now = new Date();
 	let query = {
 		building: "CB11",
-		classType: "Tut"
-	};
-
+		classType: "Tut",
+    //day:now.getDay(),
+    day:0,
+    now
+  };
 	// So MongoDB lets you do nested array queries.
 	// http://stackoverflow.com/questions/12629692/querying-an-array-of-arrays-in-mongodb
 
 	// TODO: Sort
-	let results = subjects.find({
-		"sessions.classes": {
-			weeksOn: {
-				$elemMatch: { $elemMatch: { startWeek: { $gte: now }, endWeek: { $lte: now } } }
-			},
-			startingTime: { $gte: now.time },
-			day: now.day,
-
-			building: query.building,
-			classType: query.classType
-		}
-	});
-
-	res.json(results);
-
-})
+  var subjects = mongoDatabase.collection('classes');
+  let results = subjects.find({
+    sessions:{
+      $elemMatch:{
+        classes:{
+          $elemMatch:{
+            //weeksOn:{ $elemMatch: {$elemMatch:{$in:[{$gte:query.now},'2016-04-08T14:00:00.000Z']}} },
+            day: query.day,
+            building: query.building,
+            classType: query.classType,
+            //startingTime: { $lte : now }
+          }
+        }
+      }
+    }
+  }).toArray((err,re)=>{
+    /*var responseArray = [];
+    re.forEach((item,index)=>{
+      responseArray.push({
+        subjectName: item.subjectName,
+      })
+      res.send(responseArray);
+    });*/
+    res.send(re);
+  });
+});
 
 router.get('/subjects/search', (req, res) => {
 
 })
 
-
-
-
-
-
 // Prefix with api
 app.use('/api', router);
-app.listen(port);
+app.listen(port, ()=>{console.log("Listening on", port)});
