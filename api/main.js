@@ -37,14 +37,17 @@ router.get('/', function(req, res) {
 
 router.get('/subjects/nearby', (req, res) => {
 
+	//let now = new Date();
 	let now = new Date();
-	let query = {
+  let query = {
 		building: "CB11",
 		classType: "Tut",
     //day:now.getDay(),
-    day:0,
+    day:1,
     now
   };
+
+  var today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
 	// So MongoDB lets you do nested array queries.
 	// http://stackoverflow.com/questions/12629692/querying-an-array-of-arrays-in-mongodb
 
@@ -55,11 +58,11 @@ router.get('/subjects/nearby', (req, res) => {
       $elemMatch:{
         classes:{
           $elemMatch:{
-            //weeksOn:{ $elemMatch: {$elemMatch:{$in:[{$gte:query.now},'2016-04-08T14:00:00.000Z']}} },
+            weeksOn:{ $elemMatch: {$elemMatch:{$lte:today}} },
             day: query.day,
             building: query.building,
             classType: query.classType,
-            //startingTime: { $lte : now }
+            //startingTime: {"$gte" : Date()}//{ $gte : now }
           }
         }
       }
@@ -77,6 +80,10 @@ router.get('/subjects/nearby', (req, res) => {
 });
 
 router.get('/subjects/search', (req, res) => {
+
+})
+
+router.get('/feedback', (req,res)=>{
 
 })
 
