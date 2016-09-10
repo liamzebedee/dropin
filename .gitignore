@@ -3,3 +3,5 @@
 /tmp/*
 /cookies.txt
 /api/node_modules/*
+/awsscrape/*
+.DS_Store

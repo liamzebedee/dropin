@@ -42,17 +42,19 @@ export default class API {
 
 const MOCK_SUBJECTS_BY_TEXT = [
 	{
+		id: "1",
 		subjectName: "Introduction to Swag",
 		subjectCode: "42000",
 		description: "In this subject students undertake a rigorous and detailed analysis of the notions of sex, gender and sexuality in a wide variety of cultural and social contexts. Students examine in depth how social and political institutions function to regulate sex, gender and sexuality, how gender analysis helps us understand contemporary social and political issues, and how gender and sexual identities are embodied and performed in everyday life.",
 		classes: [
 			{
+				id: "1",
 				classType: "TUT",
 				location: ["CB11", "02", "101"],
 				howLong: 90,
 
 				hour: 1,
-				min: 2,
+				min: 0,
 				day: 3
 			}
 		]
@@ -61,9 +63,10 @@ const MOCK_SUBJECTS_BY_TEXT = [
 
 const MOCK_CLASSES_BY_TEXT = [
 	{
+		id: "1",
 		classType: 'TUT',
 		hour: 1,
-		min: 2,
+		min: 0,
 		subjectName: "Advanced Swag Fundamentals",
 		subjectCode: "42000",
 		howLong: 90,
@@ -73,9 +76,10 @@ const MOCK_CLASSES_BY_TEXT = [
 	},
 
 	{
+		id: "2",
 		classType: 'WRK',
 		hour: 1,
-		min: 2,
+		min: 0,
 		subjectName: "Advanced Swag Fundamentals",
 		subjectCode: "12312",
 		howLong: 90,

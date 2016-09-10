@@ -14,13 +14,14 @@ import TextField from 'material-ui/TextField';
 import Paper from 'material-ui/Paper';
 import {List, ListItem} from 'material-ui/List';
 import TimePicker from 'material-ui/TimePicker';
+import Avatar from 'material-ui/Avatar';
 import SelectField from 'material-ui/SelectField';
 import {
   Card,
-  CardActions,
   CardHeader,
   CardMedia,
-  CardText
+  CardText,
+  CardActions
 } from 'material-ui/Card';
 import {
   Toolbar,
@@ -31,7 +32,13 @@ import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
 import IconButton from 'material-ui/IconButton';
 import FontIcon from 'material-ui/FontIcon';
 
-import { Router, Route, Link, browserHistory } from 'react-router'
+import { Router, Route, Link, browserHistory } from 'react-router';
+
+import Chip from 'material-ui/Chip';
+import {blue300, indigo900} from 'material-ui/styles/colors';
+
+// import clipboard from 'clipboard';
+import _ from 'underscore'
 
 import API from './API';
 
@@ -109,6 +116,10 @@ CB08: Brown paper bag
   const [code, text] = item.split(': ');
   return { code, text };
 });
+
+function getNiceUTSBuildingName(buildingCode) {
+  return _.findWhere(UTSBuildings, { code: buildingCode }).text;
+}
 
 // All for that sweet UX
 function roundTimeQuarterHour() {
@@ -291,6 +302,16 @@ export class NearbyClasses extends React.Component {
 class ClassCard extends React.Component {
   constructor(props) {
     super(props);
+    this.navToClass = this.navToClass.bind(this)
+    this.navToSubject = this.navToSubject.bind(this)
+  }
+
+  navToClass() {
+    browserHistory.push(`/search-subjects/subjects/${this.props.id}`);
+  }
+
+  navToSubject() {
+    browserHistory.push(`/search-subjects/subjects/${this.props.id}`);
   }
 
   render() {
@@ -301,24 +322,59 @@ class ClassCard extends React.Component {
       minutes: this.props.min
     }).format('h.mma');
     
+    // let nicerBuildingName = getNiceUTSBuildingName(this.props.building);
+    let nicerBuildingName = this.props.building;
 
     return (
     <Card>
+
       <CardHeader
         title={this.props.subjectName}
         subtitle={`${theHour} - ${classType}`}
         actAsExpander={true}
         showExpandableButton={true}
       />
+
+      
       <CardText expandable={true}>
-        <p>{this.props.subjectCode}</p>
-        <p>{theHour} - {this.props.howLong} mins</p>
-        <p style={styles.classLocation}>
-          <span style={styles.classLocationBit}>{this.props.building}</span>
-          <span style={styles.classLocationBit}>{this.props.level}</span>
-          <span style={styles.classLocationBit}>{this.props.room}</span>
-        </p>
+        <Chip style={{ margin: 4, }}>
+          <Avatar icon={<FontIcon className="material-icons">alarm</FontIcon>} />
+          {this.props.howLong} mins
+        </Chip>
+        
+        <Chip
+          style={{ margin: 4, }}>
+          <Avatar icon={<FontIcon className="material-icons">info outline</FontIcon>} />
+          
+          {classType}
+        </Chip>
+
+        <Chip
+          backgroundColor={blue300}
+          style={{ margin: 4, }}
+        >
+          <Avatar icon={<FontIcon className="material-icons">place</FontIcon>} />
+          {nicerBuildingName}.{this.props.level}.{this.props.room}
+        </Chip>
       </CardText>
+
+
+      <CardActions expandable={true}>
+        <RaisedButton
+          label="Share"
+          primary={true}
+          style={{margin: 12}}
+          icon={<FontIcon className="material-icons">share</FontIcon>}
+          onClick={this.navToClass}
+        />
+        <RaisedButton
+          label="View subject"
+          primary={true}
+          style={{margin: 12}}
+          icon={<FontIcon className="material-icons">share</FontIcon>}
+          onClick={this.navToSubject}
+        />
+      </CardActions>
     </Card>
     );
   }
@@ -354,8 +410,35 @@ export class ShowSingleSubject extends React.Component {
 
 
 
+// let $clipboard = new Clipboard('.btn');
+
+// $clipboard.on('success', function(e) {
+//   alert(e.text);
+
+// // console.info('Action:', e.action);
+// // console.info('Text:', e.text);
+// // console.info('Trigger:', e.trigger);
+
+//   e.clearSelection();
+// });
+
+
 
 // <Link to="/subjects/123">Sample subject link</Link>
+
+let AboutDialogContent = (props) => 
+  <div>
+    <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
+
+    <p>Like us on <a href="https://www.facebook.com/dropinuts" target="_blank">Facey</a></p>
+    
+    <p>Built by UTS students, for UTS students</p>
+
+    <a href="https://goo.gl/forms/zKenkNGlyTMm4raQ2" target="_blank">Feedback, ideas and suggestions</a>
+
+    <h3>Shout outs</h3>
+    <p>Built by <a href="http://liamz.co" target="_blank">Liam Zebedee</a> and Jayesh.</p>
+  </div>;
 
 
 export class AppContainer extends React.Component {
@@ -402,8 +485,7 @@ export class AppContainer extends React.Component {
 
         <div style={styles.container}>
           <Dialog title="About" modal={false} open={this.state.aboutDialogOpen} onRequestClose={() => this.setState({ aboutDialogOpen: false })}>
-            <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
-            <p>Built by <a href="http://liamz.co">Liam Zebedee</a>. Not built/sponsored/fed by UTS.</p>
+            <AboutDialogContent/>
           </Dialog>
 
           <AppBar
