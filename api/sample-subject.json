@@ -1,11 +1,13 @@
-{
-  "subjectName":"Securities Markets Law",
+ {
   "subjectId":"77901",
-  "sessions":[
+  "sessions":
+  [
     {
       "sessionName":"77901_AUT_U_1_S",
-      "classes":[
+      "classes":
+      [
         {
+          "startingTime":"2016-08-04T18:00:00+10:00",
           "durationInMins":180,
           "endTime":"2016-08-04T21:00:00+10:00",
           "day":3,
@@ -14,15 +16,14 @@
           "level":"03",
           "room":"018",
           "classType":"Lec",
-          "weeksOn":[
+          "weeksOn":
+          [
             ["2016-02-25T13:00:00.000Z","2016-04-08T14:00:00.000Z"],
             ["2016-04-29T14:00:00.000Z","2016-05-27T14:00:00.000Z"]
-          ],
-          "startHour":18,
-          "startMin":0
+          ]
         }
       ]
     }
-  ]
+  ],
+  "subjectName":"Some Subject"
 }
-

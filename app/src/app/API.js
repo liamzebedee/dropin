@@ -2,6 +2,7 @@ import Q from 'q';
 import 'whatwg-fetch';
 
 const MOCK_DATA = true;
+var moment = require('moment');
 
 function promiseFromData(data) {
 	return Q.fcall(() => data);
@@ -27,8 +28,20 @@ export default class API {
 		console.log(`Getting info for subject ${id}`)
 		if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO)
 
-		return {};
-	}
+    fetch('http://localhost:8080/api/subjects/upcoming', {
+      method: 'POST',
+      mode:'no-cors',
+      body: {
+        building,
+        day: moment(currentTime).toDate().getDay(),
+        hour: moment(currentTime).toDate().getHours(),
+      },
+    }).then((err,res)=>{
+      console.log(res);
+    })
+    //if(MOCK_DATA) return MOCK_CLASSES_BY_TEXT;
+    //return [];
+  }
 }
 
 
@@ -50,6 +63,7 @@ export default class API {
 // weeksOn: weeksOn // We don't need to know
 
 const MOCK_SUBJECTS_BY_TEXT = [
+<<<<<<< afdc4c34e6a790ef28b27eab4c653c09d28d989a
 	{
 		id: "1",
 		subjectName: "Introduction to Swag",
@@ -96,6 +110,48 @@ const MOCK_CLASSES_BY_TEXT = [
 		level: "02",
 		room: "101",
 	}
+{
+  subjectName: "Introduction to Swag",
+  subjectCode: "42000",
+  description: "In this subject students undertake a rigorous and detailed analysis of the notions of sex, gender and sexuality in a wide variety of cultural and social contexts. Students examine in depth how social and political institutions function to regulate sex, gender and sexuality, how gender analysis helps us understand contemporary social and political issues, and how gender and sexual identities are embodied and performed in everyday life.",
+  classes: [
+  {
+    classType: "TUT",
+    location: ["CB11", "02", "101"],
+    howLong: 90,
+
+    hour: 1,
+    min: 2,
+    day: 3
+  }
+  ]
+}
+];
+
+const MOCK_CLASSES_BY_TEXT = [
+{
+  classType: 'TUT',
+  hour: 1,
+  min: 2,
+  subjectName: "Advanced Swag Fundamentals",
+  subjectCode: "42000",
+  howLong: 90,
+  building: "CB11",
+  level: "02",
+  room: "101",
+},
+
+{
+  classType: 'WRK',
+  hour: 1,
+  min: 2,
+  subjectName: "Advanced Swag Fundamentals",
+  subjectCode: "12312",
+  howLong: 90,
+  building: "CB11",
+  level: "02",
+  room: "101",
+}
 ];
 
 

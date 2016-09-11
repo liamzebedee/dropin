@@ -27,11 +27,11 @@
     "webpack-dev-server": "^1.14.0"
   },
   "dependencies": {
-    "clipboard": "^1.5.12",
-    "fuzzy": "^0.1.1",
+"clipboard": "^1.5.12",
+    "fetch": "^1.1.0","fuzzy": "^0.1.1",
     "json-loader": "^0.5.4",
     "material-ui": "^0.15.0-beta.2",
-    "moment": "^2.13.0",
+    "moment": "^2.14.1",
     "pouchdb": "^5.3.2",
     "q": "^1.4.1",
     "react": "^15.0.1",

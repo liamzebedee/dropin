@@ -48,19 +48,19 @@ router.get('/', function(req, res) {
 });
 
 
-router.get('/subjects/nearby', (req, res) => {
+router.post('/subjects/upcoming', (req, res) => {
 
-	//let now = new Date();
 	let now = new Date();
-  let query = {
-		building: "CB11",
-		classType: "Tut",
-    //day:now.getDay(),
-    day:1,
-    now
+
+  let query =  req.body || {
+    building: "CB11",
+    classType: "Tut",
+    day:now.getDay(),
+    hour: now.getHours(),
   };
 
   var today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
+  console.log(query);
 	// So MongoDB lets you do nested array queries.
 	// http://stackoverflow.com/questions/12629692/querying-an-array-of-arrays-in-mongodb
 
@@ -72,10 +72,10 @@ router.get('/subjects/nearby', (req, res) => {
         classes:{
           $elemMatch:{
             weeksOn:{ $elemMatch: {$elemMatch:{$lte:today}} },
-            day: query.day,
+            day: now.getDay(),
             building: query.building,
-            classType: query.classType,
-            //startingTime: {"$gte" : Date()}//{ $gte : now }
+            //classType: query.classType,
+            startHour: {$gte: query.hour}
           }
         }
       }
@@ -83,11 +83,10 @@ router.get('/subjects/nearby', (req, res) => {
   }).toArray((err,re)=>{
     /*var responseArray = [];
     re.forEach((item,index)=>{
-      responseArray.push({
-        subjectName: item.subjectName,
-      })
-      res.send(responseArray);
-    });*/
+      if (item.sessions)
+      responseArray.push(item);
+  });*/
+    //res.send(responseArray);
     res.send(re);
   });
 });
