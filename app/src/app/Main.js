@@ -122,8 +122,8 @@ function getNiceUTSBuildingName(buildingCode) {
 }
 
 // All for that sweet UX
-function roundTimeQuarterHour() {
-    var time = new Date;
+function roundTimeQuarterHour(time) {
+    time = time || new Date;
 
     time.setMilliseconds(Math.round(time.getMilliseconds() / 1000) * 1000);
     time.setSeconds(Math.round(time.getSeconds() / 60) * 60);
@@ -248,19 +248,17 @@ export class NearbyClasses extends React.Component {
 
   changeBuildingQuery(event, index, value) {
      this.setState({ buildingQuery: value })
-
-     this.searchNearby();
+     this.searchNearby(value, this.state.currentTime);
   }
 
   changeCurrentTime(ev, date) {
-    this.updateCurrentTimeQuery(date)
+    date = roundTimeQuarterHour(date)
     this.setState({ currentTime: date });
-
-    this.searchNearby();
+    this.searchNearby(this.state.buildingQuery, date);
   }
 
-  searchNearby() {
-    let results = API.searchNearbyClasses(this.state.buildingQuery, this.state.currentTime).then((results) => {
+  searchNearby(building, time) {
+    let results = API.searchNearbyClasses(building, time).then((results) => {
       this.setState({ searchNearbyResults: results })
     });
   }
