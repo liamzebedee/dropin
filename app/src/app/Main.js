@@ -43,7 +43,7 @@ import _ from 'underscore'
 import API from './API';
 
 var moment = require('moment');
-
+moment.locale('en-AU');
 
 const ClassTypes = {
   "CNR": "Class Not Required",
@@ -152,8 +152,9 @@ export class SearchSubjects extends React.Component {
   }
 
   searchSubjectsByText() {
-    let results = API.searchSubjectsByText(this.state.searchByTextQuery);
-    this.setState({ searchByTextResults: results });
+    let results = API.searchSubjectsByText(this.state.searchByTextQuery).then((results) => {
+      this.setState({ searchByTextResults: results });
+    });
   }
 
   render() {
@@ -185,9 +186,11 @@ export class SearchSubjects extends React.Component {
 
 class SubjectCard extends React.Component {
   render() {
-    this.props.classes.sort((a, b) => {
-      return a.day - b.day;
-    });
+    if(!this.props.sessions[0]) return null;
+
+    this.props.sessions[0].classes.sort((a, b) => {
+      return (a.day - b.day);
+    })
 
     return (
     <Card>
@@ -199,18 +202,19 @@ class SubjectCard extends React.Component {
       />
       <CardText expandable={true}>
         <List>
-          {this.props.classes.map((subjectClass, i) => {
+          {this.props.sessions[0].classes.map((subjectClass, i) => {
 
             var dateNice = moment({
-              hours: subjectClass.hour,
-              minutes: subjectClass.min
-            }).isoWeekday(subjectClass.day).format('dddd h.mma');
+              hours: subjectClass.startHour,
+              minutes: subjectClass.startMin
+            }).day(1  + subjectClass.day).format('dddd h.mma');
 
             var classType = ClassTypes[subjectClass.classType.toUpperCase()];
+            let hours = Math.round(subjectClass.durationInMins / 60, 1);
 
             return <ListItem key={i}
               primaryText={dateNice}
-              secondaryText={classType + " in " + subjectClass.location.join('.') + " - " + `${subjectClass.howLong}mins`}
+              secondaryText={`${classType} in ${subjectClass.location} - ${hours}hrs`}
             />;
           })}
         </List>
@@ -256,11 +260,9 @@ export class NearbyClasses extends React.Component {
   }
 
   searchNearby() {
-    let results = API.searchNearbyClasses(this.state.buildingQuery, this.state.currentTime);
-
-    this.setState({
-      searchNearbyResults: results
-    })
+    let results = API.searchNearbyClasses(this.state.buildingQuery, this.state.currentTime).then((results) => {
+      this.setState({ searchNearbyResults: results })
+    });
   }
 
   render() {
@@ -391,8 +393,9 @@ export class ShowSingleSubject extends React.Component {
   }
 
   componentDidMount() {
-    let info = API.getSubjectInfo(this.props.id);
-    this.setState({ subject: info })
+    let info = API.getSubjectInfo(this.props.id).then(() => {
+      this.setState({ subject: info })
+    });
   }
 
   render() {
@@ -489,7 +492,7 @@ export class AppContainer extends React.Component {
           </Dialog>
 
           <AppBar
-          title="Drop In @ UTS"
+          title="Drop In UTS"
           iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}/>
 
           <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab}>

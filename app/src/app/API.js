@@ -1,22 +1,31 @@
+import Q from 'q';
+import 'whatwg-fetch';
+
 const MOCK_DATA = true;
+
+function promiseFromData(data) {
+	return Q.fcall(() => data);
+}
 
 export default class API {
 	static searchSubjectsByText(query) {
 		console.log(`Searching for subjects sounding like ${query}`)
+		// if(MOCK_DATA) return promiseFromData(MOCK_SUBJECTS_BY_TEXT)
 
-		if(MOCK_DATA) return MOCK_SUBJECTS_BY_TEXT;
-		return [];
+		let res = fetch(`http://localhost:8080/api/subjects/search?q=${query}`).then((res) => res.json());
+		return res;
 	}
 
 	static searchNearbyClasses(building, currentTime) {
 		console.log(`Searching for subjects near ${building} around ${currentTime}`)
-		if(MOCK_DATA) return MOCK_CLASSES_BY_TEXT;
+		if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
 		
 		return [];
 	}
 
 	static getSubjectInfo(id) {
-		if(MOCK_DATA) return MOCK_SUBJECT_INFO;
+		console.log(`Getting info for subject ${id}`)
+		if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO)
 
 		return {};
 	}
@@ -50,7 +59,7 @@ const MOCK_SUBJECTS_BY_TEXT = [
 			{
 				id: "1",
 				classType: "TUT",
-				location: ["CB11", "02", "101"],
+				location: "CB11.02.101",
 				howLong: 90,
 
 				hour: 1,
