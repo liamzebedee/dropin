@@ -4,10 +4,8 @@ var assert = require('assert');
 const MONGO_URL = "mongodb://test:password@ds161255.mlab.com:61255/dbdropin";
 
 function isDigit(n) {
-    return Boolean([true, true, true, true, true, true, true, true, true, true][n]);
+  return Boolean([true, true, true, true, true, true, true, true, true, true][n]);
 }
-
-
 
 var mongoDatabase;
 // Connect to the db
@@ -15,8 +13,7 @@ MongoClient.connect(MONGO_URL, function(err, db) {
   if(!err) {
     console.log("We are connected");
     mongoDatabase = db;
-    mongoDatabase.collection('classes').createIndex({ subjectName: "text" })
-    
+    mongoDatabase.collection('classes').createIndex({ subjectName: "text" });
   }else{
     console.log("MongoDB connection error", err);
   }
@@ -36,10 +33,10 @@ var port = process.env.PORT || 8080;
 var router = express.Router();
 
 app.all('*', function(req, res, next) {
-       res.header("Access-Control-Allow-Origin", "*");
-       res.header("Access-Control-Allow-Headers", "X-Requested-With");
-       res.header('Access-Control-Allow-Headers', 'Content-Type');
-       next();
+ res.header("Access-Control-Allow-Origin", "*");
+ res.header("Access-Control-Allow-Headers", "X-Requested-With");
+ res.header('Access-Control-Allow-Headers', 'Content-Type');
+ next();
 });
 
 
@@ -51,9 +48,8 @@ router.get('/', function(req, res) {
 router.post('/subjects/upcoming', (req, res) => {
 
 	let now = new Date();
-
   let query =  req.body || {
-    building: "CB11",
+    building: "CB10",
     classType: "Tut",
     day:now.getDay(),
     hour: now.getHours(),
@@ -66,29 +62,36 @@ router.post('/subjects/upcoming', (req, res) => {
 
 	// TODO: Sort
   var subjects = mongoDatabase.collection('classes');
-  let results = subjects.find({
-    sessions:{
-      $elemMatch:{
-        classes:{
-          $elemMatch:{
-            weeksOn:{ $elemMatch: {$elemMatch:{$lte:today}} },
-            day: now.getDay(),
-            building: query.building,
-            //classType: query.classType,
-            startHour: {$gte: query.hour}
-          }
-        }
-      }
-    }
-  }).toArray((err,re)=>{
-    /*var responseArray = [];
-    re.forEach((item,index)=>{
-      if (item.sessions)
-      responseArray.push(item);
-  });*/
-    //res.send(responseArray);
-    res.send(re);
-  });
+  // let results = subjects.find({
+  //   sessions:{
+  //     $elemMatch:{
+  //       classes:{
+  //         $elemMatch:{
+  //           weeksOn:{ $elemMatch: {$elemMatch:{$lte:today}} },
+  //           day: now.getDay(),
+  //           //building: query.building,
+  //           //classType: query.classType,
+  //           startHour: {$gte: query.hour}
+  //         }
+  //       }
+  //     }
+  //   }
+  // },
+  // //  {
+  // //  'sessions.$.classes.$':1
+  // // }
+  // ).toArray((err,re)=>{
+  //   /*var responseArray = [];
+  //   re.forEach((item,index)=>{
+  //     if (item.sessions)
+  //     responseArray.push(item);
+  // });*/
+  //   //res.send(responseArray);
+  //   console.log(re);
+  //   res.send(re);
+  // });
+
+  let results = subjects.aggregate()
 });
 
 router.get('/subjects/search', (req, res) => {
@@ -110,18 +113,18 @@ router.get('/subjects/search', (req, res) => {
     // Search for subject name
     selector = {
       $text: {
-          $search: query.q.toLowerCase(),
+        $search: query.q.toLowerCase(),
           // $caseSensitive: false,
           $language: "EN"
         }
-    };
-  }
+      };
+    }
 
-  var subjects = mongoDatabase.collection('classes');
-  subjects.find(selector).toArray((err,re)=>{
-    res.send(re);
-  });
-  
+    var subjects = mongoDatabase.collection('classes');
+    subjects.find(selector).toArray((err,re)=>{
+      res.send(re);
+    });
+
 })
 
 router.get('/feedback', (req,res)=>{
