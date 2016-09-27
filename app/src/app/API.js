@@ -2,6 +2,12 @@ import Q from 'q';
 import 'whatwg-fetch';
 
 const MOCK_DATA = true;
+let API_BASE = "";
+if(MOCK_DATA) {
+	API_BASE = "http://localhost:8080/api"
+}
+	
+
 var moment = require('moment');
 
 function promiseFromData(data) {
@@ -13,45 +19,33 @@ export default class API {
 		console.log(`Searching for subjects sounding like ${query}`)
 		// if(MOCK_DATA) return promiseFromData(MOCK_SUBJECTS_BY_TEXT)
 
-		let res = fetch(`http://localhost:8080/api/subjects/search?q=${query}`).then((res) => res.json());
+		let res = fetch(`${API_BASE}/subjects/search?q=${query}`).then((res) => res.json());
 		return res;
 	}
 
-	static searchNearbyClasses(building, currentTime) {
-		console.log(`Searching for subjects near ${building} around ${currentTime}`)
+	static searchNearbyClasses(building, currentTime = new Date) {
+		let hour = currentTime.getHours()
+		let DAYS = "Mon Tue Wed Thu Fri Sat Sun".split(' ')
 
-    fetch('http://localhost:8080/api/subjects/upcoming', {
-      method: 'post',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        building,
-        day: 0,//moment(currentTime).toDate().getDay(),
-        hour: 6,// moment(currentTime).toDate().getHours(),
-      })
-    }).then((response)=>{
-      if (response.status !== 200){
-        console.log("Receive ${response.status} from server");
-      }
-      return response;
-    }).then((response)=>{
-      return response.json()
-    }).then((json)=>{
-      console.log(json);
-    })
-		if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
+		let day = (currentTime.getDay() + 6) % 7; // we begin on Monday = 0
+		if(day === 5 || day === 6) {
+			day = 0;
+		}
 
-		return [];
+		let dayStr = DAYS[day];
+		console.log(`Searching for subjects near ${building} around ${hour} on ${dayStr}day`)
+
+		let res = fetch(`${API_BASE}/classes/search?building=${building}&day=${day}&hour=${hour}`).then((res) => res.json());
+
+		// if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
+
+		return res;
 	}
 
 	static getSubjectInfo(id) {
 		console.log(`Getting info for subject ${id}`)
 		if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO)
-    //if(MOCK_DATA) return MOCK_CLASSES_BY_TEXT;
-    //return [];
-  }
+	}
 }
 
 

@@ -243,7 +243,7 @@ export class NearbyClasses extends React.Component {
   }
 
   componentDidMount() {
-    this.searchNearby();
+    this.searchNearby(this.state.buildingQuery, this.state.currentTime);
   }
 
   changeBuildingQuery(event, index, value) {
@@ -318,8 +318,8 @@ class ClassCard extends React.Component {
     var classType = ClassTypes[this.props.classType.toUpperCase()];
 
     const theHour = moment({
-      hours: this.props.hour,
-      minutes: this.props.min
+      hours: this.props.startHour,
+      minutes: this.props.startMin
     }).format('h.mma');
     
     // let nicerBuildingName = getNiceUTSBuildingName(this.props.building);

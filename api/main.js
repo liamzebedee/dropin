@@ -8,16 +8,10 @@ function isDigit(n) {
 }
 
 var mongoDatabase;
-// Connect to the db
-MongoClient.connect(MONGO_URL, function(err, db) {
-  if(!err) {
-    console.log("We are connected");
-    mongoDatabase = db;
-    mongoDatabase.collection('classes').createIndex({ subjectName: "text" });
-  }else{
-    console.log("MongoDB connection error", err);
-  }
-});
+
+
+let classes = null;
+
 
 var express    = require('express');
 var app        = express();
@@ -45,54 +39,78 @@ router.get('/', function(req, res) {
 });
 
 
-router.post('/subjects/upcoming', (req, res) => {
 
-	let now = new Date();
-  let query =  req.body || {
-    building: "CB10",
-    classType: "Tut",
-    day:now.getDay(),
-    hour: now.getHours(),
+
+router.get('/classes/search', (req, res) => {
+	// let now = new Date();
+
+  // let defaultQuery = {
+  //   // classType: "Tut",
+  //   day: now.getDay(),
+  //   hour: now.getHours(),
+  // }
+
+  // let testQuery = {
+  //   building: "CB10",
+  //   day: 0, // monday
+  //   hour: 10,
+  // }
+
+  let query = {
+    building: ""+req.query.building,
+    day: Number(req.query.day),
+    hour: Number(req.query.hour),
+  }
+
+  // query = testQuery;
+
+  let selector = {
+    day: query.day,
+    startHour: { $gte: query.hour },
+    building: query.building,
+
+    "session.trimester": "SPR",
   };
 
-  var today = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + now.getDate();
-  console.log(query);
-	// So MongoDB lets you do nested array queries.
-	// http://stackoverflow.com/questions/12629692/querying-an-array-of-arrays-in-mongodb
+  console.log(selector);
 
-	// TODO: Sort
-  var subjects = mongoDatabase.collection('classes');
-  // let results = subjects.find({
-  //   sessions:{
-  //     $elemMatch:{
-  //       classes:{
-  //         $elemMatch:{
-  //           weeksOn:{ $elemMatch: {$elemMatch:{$lte:today}} },
-  //           day: now.getDay(),
-  //           //building: query.building,
-  //           //classType: query.classType,
-  //           startHour: {$gte: query.hour}
-  //         }
-  //       }
-  //     }
-  //   }
-  // },
-  // //  {
-  // //  'sessions.$.classes.$':1
-  // // }
-  // ).toArray((err,re)=>{
-  //   /*var responseArray = [];
-  //   re.forEach((item,index)=>{
-  //     if (item.sessions)
-  //     responseArray.push(item);
-  // });*/
-  //   //res.send(responseArray);
-  //   console.log(re);
-  //   res.send(re);
-  // });
+  let data;
 
-  let results = subjects.aggregate()
+  classes
+  .find(selector)
+  .sort({
+    'startHour': 1
+  })
+  .toArray((err, arr) => {
+    if(err) console.error(err);
+
+    // data = arr;
+
+    // let promises = data.map(classInfo => {
+    //   console.log({ code: classInfo.subjectId })
+    //   let promise = subjectInfos.findOne({ code: classInfo.subjectId })
+    //   return promise;
+    // })
+
+    // Promise.all(promises).then((vals) => {
+    //   console.log(vals[0])
+    //   vals.map((subjInfo, i) => {
+    //     data[i].subject = subjInfo;
+    //   })
+
+    //   res.send(data)
+    // })
+
+
+  })
+
+  
+
+  
+
 });
+
+
 
 router.get('/subjects/search', (req, res) => {
   let query = {
@@ -133,4 +151,21 @@ router.get('/feedback', (req,res)=>{
 
 // Prefix with api
 app.use('/api', router);
-app.listen(port, ()=>{console.log("Listening on", port)});
+
+
+
+// Connect to the db
+MongoClient.connect(MONGO_URL, function(err, db) {
+  if(!err) {
+    console.log("We are connected");
+    mongoDatabase = db;
+    mongoDatabase.collection('classes').createIndex({ subjectName: "text" });
+
+    classes = mongoDatabase.collection('classes')
+    subjectInfos = mongoDatabase.collection('subjectInfo')
+
+    app.listen(port, ()=>{console.log("Listening on", port)});
+  }else{
+    console.log("MongoDB connection error", err);
+  }
+});
