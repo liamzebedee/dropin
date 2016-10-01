@@ -101,6 +101,19 @@ router.get('/classes/search', (req, res) => {
   })
 });
 
+router.get('/subject', (req,res)=>{
+  console.log(req.query.subjectId);
+  const selector = {
+    code : "" + req.query.subjectId,
+  };
+  subjectInfos
+    .findOne(selector)
+    .then((doc,err)=>{
+      if (!err){
+      res.send(doc);
+      }else res.sendStatus(500);
+    });
+});
 
 
 // router.get('/subjects/search', (req, res) => {
@@ -142,8 +155,6 @@ router.get('/feedback', (req,res)=>{
 
 // Prefix with api
 app.use('/api', router);
-
-
 
 // Connect to the db
 MongoClient.connect(MONGO_URL, function(err, db) {

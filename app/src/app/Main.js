@@ -21,12 +21,12 @@ import {
   CardHeader,
   CardMedia,
   CardText,
-  CardActions
+  CardActions,
 } from 'material-ui/Card';
 import {
   Toolbar,
   ToolbarGroup,
-  ToolbarSeparator
+  ToolbarSeparator,
 } from 'material-ui/Toolbar';
 import ActionInfoOutline from 'material-ui/svg-icons/action/info-outline';
 import IconButton from 'material-ui/IconButton';
@@ -149,7 +149,7 @@ export class SearchSubjects extends React.Component {
   }
 
   componentDidMount() {
-    if(this.state.searchByTextQuery != '') this.searchSubjectsByText();
+    if(this.state.searchByTextQuery !== '') this.searchSubjectsByText();
   }
 
   searchSubjectsByText() {
@@ -447,8 +447,7 @@ export class AppContainer extends React.Component {
 
     this.state = {
       aboutDialogOpen: false,
-
-      currentTab: 'search'
+      currentTab: 'search',
     };
   }
 
