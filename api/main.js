@@ -11,6 +11,7 @@ var mongoDatabase;
 
 
 let classes = null;
+let subjectInfos = null;
 
 
 var express    = require('express');
@@ -84,23 +85,24 @@ router.get('/classes/search', (req, res) => {
   .toArray((err, arr) => {
     if(err) console.error(err);
 
-    // data = arr;
+    let dataWithSubjectInfo = arr;
 
-    // let promises = data.map(classInfo => {
-    //   console.log({ code: classInfo.subjectId })
-    //   let promise = subjectInfos.findOne({ code: classInfo.subjectId })
-    //   return promise;
-    // })
+    let promises = dataWithSubjectInfo.map(classInfo => {
+      // NOTE result of findOne should be JSON blob
+      let promise = subjectInfos.findOne({ code: classInfo.subjectId })
+      return promise;
+    })
 
-    // Promise.all(promises).then((vals) => {
-    //   console.log(vals[0])
-    //   vals.map((subjInfo, i) => {
-    //     data[i].subject = subjInfo;
-    //   })
 
-    //   res.send(data)
-    // })
 
+    Promise.all(promises).then((vals) => {
+      vals.map((subjInfo, i) => {
+        console.log(subjInfo)
+        dataWithSubjectInfo[i].subject = subjInfo;
+      })
+
+      res.send(dataWithSubjectInfo)
+    })
 
   })
 
@@ -112,38 +114,38 @@ router.get('/classes/search', (req, res) => {
 
 
 
-router.get('/subjects/search', (req, res) => {
-  let query = {
-    q: req.query.q
-    // q: "48023",
-    // q: "french",
-  }
+// router.get('/subjects/search', (req, res) => {
+//   let query = {
+//     q: req.query.q
+//     // q: "48023",
+//     // q: "french",
+//   }
 
-  let selector;
+//   let selector;
 
-  if(isDigit(query.q.charAt(0))) {
-    // Search for subject code
-    selector = {
-      subjectId: query.q
-    };
+//   if(isDigit(query.q.charAt(0))) {
+//     // Search for subject code
+//     selector = {
+//       subjectId: query.q
+//     };
 
-  } else {
-    // Search for subject name
-    selector = {
-      $text: {
-        $search: query.q.toLowerCase(),
-          // $caseSensitive: false,
-          $language: "EN"
-        }
-      };
-    }
+//   } else {
+//     // Search for subject name
+//     selector = {
+//       $text: {
+//         $search: query.q.toLowerCase(),
+//           // $caseSensitive: false,
+//           $language: "EN"
+//         }
+//       };
+//     }
 
-    var subjects = mongoDatabase.collection('classes');
-    subjects.find(selector).toArray((err,re)=>{
-      res.send(re);
-    });
+//     // var subjects = mongoDatabase.collection('classes');
+//     subjectInfos.find(selector).toArray((err,re)=>{
+//       res.send(re);
+//     });
 
-})
+// })
 
 router.get('/feedback', (req,res)=>{
 
@@ -162,7 +164,7 @@ MongoClient.connect(MONGO_URL, function(err, db) {
     mongoDatabase.collection('classes').createIndex({ subjectName: "text" });
 
     classes = mongoDatabase.collection('classes')
-    subjectInfos = mongoDatabase.collection('subjectInfo')
+    subjectInfos = mongoDatabase.collection('subjectInfos')
 
     app.listen(port, ()=>{console.log("Listening on", port)});
   }else{

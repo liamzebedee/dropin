@@ -29,10 +29,11 @@ const param_building = "CB10";
 const param_hour = 10;
 const param_day = 0; // mon
 request(apiUrl(`/classes/search?building=${param_building}&hour=${param_hour}&day=${param_day}`), function (error, response, body) {
-
-	let data = JSON.parse(body)
 	console.log(body)
-	console.log(data[0].subject)
+	
+	// let data = JSON.parse(body);
+	// console.log(body)
+	// console.log(data[0].subject)
 
-	assert.equal(response.statusCode, 200);
+	// assert.equal(response.statusCode, 200);
 })

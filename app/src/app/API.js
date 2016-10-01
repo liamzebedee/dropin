@@ -37,7 +37,7 @@ export default class API {
 
 		let res = fetch(`${API_BASE}/classes/search?building=${building}&day=${day}&hour=${hour}`).then((res) => res.json());
 
-		// if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
+		if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
 
 		return res;
 	}
@@ -99,6 +99,10 @@ const MOCK_CLASSES_BY_TEXT = [
 		building: "CB11",
 		level: "02",
 		room: "101",
+		subject: {
+			code: "123213",
+			name: "Psychfarmacology"
+		}
 	},
 
 	{
@@ -112,6 +116,10 @@ const MOCK_CLASSES_BY_TEXT = [
 		building: "CB11",
 		level: "02",
 		room: "101",
+		subject: {
+			code: "123213",
+			name: "Psychfarmacology"
+		}
 	},
 
 {
