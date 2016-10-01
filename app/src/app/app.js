@@ -20,10 +20,8 @@ initAnalytics();
 ReactDOM.render((
   <Router history={browserHistory}>
     <Route path="/" component={AppContainer}>
-    	<Route path="search-subjects(/:searchQuery)" component={SearchSubjects}>
-	      <Route path="subjects/:id" component={ShowSingleSubject}/>
-    	</Route>
-
+    	<Route path="search-subjects(/:searchQuery)" component={SearchSubjects}/>
+      <Route path="subjects/:id" component={ShowSingleSubject}/>
     	<Route path="nearby(/:location)" component={NearbyClasses}/>
 
       <Route path="*" component={NoMatch}/>

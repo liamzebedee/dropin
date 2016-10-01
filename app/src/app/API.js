@@ -44,8 +44,14 @@ export default class API {
 	}
 
 	static getSubjectInfo(id) {
-		console.log(`Getting info for subject ${id}`)
-		if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO)
+		console.log(`Getting info for subject ${id}`);
+        let res = fetch(`${API_BASE}/subject?subjectId=${id}`)
+      .then((res) => res.json());
+
+    //if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO);
+
+    return res;
+
 	}
 }
 

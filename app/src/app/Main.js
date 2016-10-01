@@ -295,6 +295,23 @@ export class NearbyClasses extends React.Component {
   }
 }
 
+class SubjectInfoCard extends React.Component {
+  render() {
+    console.log('Rendering...',this.props);
+    return (
+    <Card>
+      <CardHeader
+        title={this.props.name}
+        subtitle={this.props.code}
+      />
+      <CardText>
+        {this.props.description || 'Just another useless subject offered by UTS'}
+      </CardText>
+    </Card>
+    );
+  }
+}
+
 class ClassCard extends React.Component {
   constructor(props) {
     super(props);
@@ -303,11 +320,11 @@ class ClassCard extends React.Component {
   }
 
   navToClass() {
-    browserHistory.push(`/search-subjects/subjects/${this.props.id}`);
+    browserHistory.push(`/search-subjects/subjects/${this.props.subjectId}`);
   }
 
   navToSubject() {
-    browserHistory.push(`/search-subjects/subjects/${this.props.id}`);
+    browserHistory.push(`/subjects/${this.props.subjectId}`);
   }
 
   render() {
@@ -387,18 +404,17 @@ export class ShowSingleSubject extends React.Component {
   }
 
   componentDidMount() {
-    let info = API.getSubjectInfo(this.props.id).then(() => {
-      this.setState({ subject: info })
+    let info = API.getSubjectInfo(this.props.params.id).then((info) => {
+      //console.log('Called',info);
+      this.setState({ subject: info });
     });
   }
-
   render() {
     if(!this.state.subject) {
-      return <div>Loading</div>;
+      return <div>Loading...</div>;
     }
-
     return <div>
-      <SubjectCard {...subject}/>
+      <SubjectInfoCard {...this.state.subject}/>
     </div>;
   }
 }
@@ -434,17 +450,15 @@ let AboutDialogContent = (props) =>
     <a href="https://goo.gl/forms/zKenkNGlyTMm4raQ2" target="_blank">Feedback, ideas and suggestions</a>
 
     <h3>Shout outs</h3>
-    <p>Built by <a href="http://liamz.co" target="_blank">Liam Zebedee</a> and Jayesh.</p>
+    <p>Built by <a href="http://liamz.co" target="_blank">Liam Zebedee</a> and
+     <a href="https://github.com/jayesh100/" target="_blank">Jayesh Malhotra</a>.</p>
   </div>;
 
 
 export class AppContainer extends React.Component {
   constructor(props, context) {
     super(props, context);
-
     this.handleUserSwapTab = this.handleUserSwapTab.bind(this)
-
-
     this.state = {
       aboutDialogOpen: false,
       currentTab: 'search',
