@@ -6,7 +6,7 @@ let API_BASE = "";
 if(MOCK_DATA) {
 	API_BASE = "http://localhost:8080/api"
 }
-	
+
 
 var moment = require('moment');
 
@@ -28,18 +28,19 @@ export default class API {
 		let DAYS = "Mon Tue Wed Thu Fri Sat Sun".split(' ')
 
 		let day = (currentTime.getDay() + 6) % 7; // we begin on Monday = 0
-		if(day === 5 || day === 6) {
+		if(day >= 5) {
 			day = 0;
 		}
 
 		let dayStr = DAYS[day];
 		console.log(`Searching for subjects near ${building} around ${hour} on ${dayStr}day`)
 
-		let res = fetch(`${API_BASE}/classes/search?building=${building}&day=${day}&hour=${hour}`).then((res) => res.json());
+		let res = fetch(`${API_BASE}/classes/search?building=${building}&day=${day}&hour=${hour}`)
+      .then((res) => res.json());
 
-		if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
+		//if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
+    return res;
 
-		return res;
 	}
 
 	static getSubjectInfo(id) {
@@ -81,10 +82,10 @@ const MOCK_SUBJECTS_BY_TEXT = [
 
 				hour: 1,
 				min: 0,
-				day: 3
-			}
-		]
-	}
+				day: 3,
+			},
+		],
+	},
 ];
 
 const MOCK_CLASSES_BY_TEXT = [

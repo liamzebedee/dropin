@@ -39,9 +39,6 @@ router.get('/', function(req, res) {
   res.json({ message: 'hooray! welcome to our api!' });
 });
 
-
-
-
 router.get('/classes/search', (req, res) => {
 	// let now = new Date();
 
@@ -69,7 +66,6 @@ router.get('/classes/search', (req, res) => {
     day: query.day,
     startHour: { $gte: query.hour },
     building: query.building,
-
     "session.trimester": "SPR",
   };
 
@@ -93,8 +89,6 @@ router.get('/classes/search', (req, res) => {
       return promise;
     })
 
-
-
     Promise.all(promises).then((vals) => {
       vals.map((subjInfo, i) => {
         console.log(subjInfo)
@@ -105,11 +99,6 @@ router.get('/classes/search', (req, res) => {
     })
 
   })
-
-  
-
-  
-
 });
 
 

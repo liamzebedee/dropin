@@ -6,17 +6,11 @@ import { Router, Route, Link, browserHistory, IndexRoute } from 'react-router'
 import { AppContainer, ShowSingleSubject, SearchSubjects, NearbyClasses } from './Main';
 import initAnalytics from './analytics';
 
-
-
 // Needed for onTouchTap
 // Can go away when react 1.0 release
 // Check this repo:
 // https://github.com/zilverline/react-tap-event-plugin
 injectTapEventPlugin();
-
-
-
-
 
 const NoMatch = () => <span>No match</span>;
 

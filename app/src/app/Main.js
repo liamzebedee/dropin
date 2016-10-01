@@ -56,7 +56,7 @@ const ClassTypes = {
   "STU": "Studio",
   "TUT": "Tutorial",
   "UPS": "U:PASS session",
-  "WRK": "Workshop"
+  "WRK": "Workshop",
 };
 
 const styles = {
@@ -66,8 +66,8 @@ const styles = {
   },
   classLocationBit: {
     paddingRight: 5,
-    fontWeight: 600
-  }
+    fontWeight: 600,
+  },
 };
 
 const muiTheme = getMuiTheme({
@@ -83,6 +83,7 @@ class ResultsSection extends React.Component {
   }
 
   render() {
+    //console.log(this.props.results);
     var note = this.props.results.length > 0 ? this.props.results.length + ' ' + this.props.unitOfMeasurement + ' found!' : 'no results :-(';
     return (
       <div>
@@ -159,9 +160,9 @@ export class SearchSubjects extends React.Component {
 
   render() {
     let result;
-    if(!this.props.children) 
+    if(!this.props.children)
       result = <ResultsSection unitOfMeasurement={"subjects"} results={this.state.searchByTextResults} renderItem={(item, i) => <SubjectCard key={i} {...item}/>}/>;
-    else 
+    else
       result = this.props.children;
 
         return <div>
@@ -169,9 +170,9 @@ export class SearchSubjects extends React.Component {
                   <ToolbarGroup firstChild={true}>
                     <FontIcon className="material-icons">search</FontIcon>
                     <TextField
-                      hintText="Keywords, code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery' style={{ 
+                      hintText="Keywords, code, etc." onChange={(ev) => this.setState({ searchByTextQuery: ev.target.value })} value={this.state.searchByTextQuery} name='searchByTextQuery' style={{
                           width: 200,
-                          display: 'inline'
+                          display: 'inline',
                         }}/>
                   </ToolbarGroup>
                   <ToolbarGroup>
@@ -206,7 +207,7 @@ class SubjectCard extends React.Component {
 
             var dateNice = moment({
               hours: subjectClass.startHour,
-              minutes: subjectClass.startMin
+              minutes: subjectClass.startMin,
             }).day(1  + subjectClass.day).format('dddd h.mma');
 
             var classType = ClassTypes[subjectClass.classType.toUpperCase()];
@@ -258,17 +259,18 @@ export class NearbyClasses extends React.Component {
   }
 
   searchNearby(building, time) {
-    let results = API.searchNearbyClasses(building, time).then((results) => {
+    let results = API.searchNearbyClasses(building, time)
+    .then((results) => {
       this.setState({ searchNearbyResults: results })
     });
   }
 
   render() {
-    return <div>         
+    return <div>
                 <Toolbar noGutter={true}>
 
                   <ToolbarGroup firstChild={false}>
-                    
+
                     <FontIcon className="material-icons">place</FontIcon>
                     <DropDownMenu value={this.state.buildingQuery} onChange={this.changeBuildingQuery} fullWidth={true} >
                       {UTSBuildings.map((item, i) => <MenuItem key={i} value={item.code} primaryText={item.text}/>)}
@@ -281,20 +283,14 @@ export class NearbyClasses extends React.Component {
                         name='time'
                         value={this.state.currentTime}
                         onChange={this.changeCurrentTime}
-                        autoOk={true} 
-                        textFieldStyle={{ 
+                        autoOk={true}
+                        textFieldStyle={{
                           width: 90,
-                          display: 'inline'
+                          display: 'inline',
                         }}/>
                   </ToolbarGroup>
-
                 </Toolbar>
-
-                
-
-
                 <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
-
               </div>;
   }
 }
@@ -319,9 +315,9 @@ class ClassCard extends React.Component {
 
     const theHour = moment({
       hours: this.props.startHour,
-      minutes: this.props.startMin
+      minutes: this.props.startMin,
     }).format('h.mma');
-    
+
     // let nicerBuildingName = getNiceUTSBuildingName(this.props.building);
     let nicerBuildingName = this.props.building;
 
@@ -329,29 +325,29 @@ class ClassCard extends React.Component {
     <Card>
 
       <CardHeader
-        title={this.props.subjectName}
+        title={this.props.subject.name}
         subtitle={`${theHour} - ${classType}`}
         actAsExpander={true}
         showExpandableButton={true}
       />
 
-      
+
       <CardText expandable={true}>
-        <Chip style={{ margin: 4, }}>
+        <Chip style={{ margin: 4 }}>
           <Avatar icon={<FontIcon className="material-icons">alarm</FontIcon>} />
-          {this.props.howLong} mins
+          {this.props.durationInMins} mins
         </Chip>
-        
+
         <Chip
-          style={{ margin: 4, }}>
+          style={{ margin: 4 }}>
           <Avatar icon={<FontIcon className="material-icons">info outline</FontIcon>} />
-          
+
           {classType}
         </Chip>
 
         <Chip
           backgroundColor={blue300}
-          style={{ margin: 4, }}
+          style={{ margin: 4 }}
         >
           <Avatar icon={<FontIcon className="material-icons">place</FontIcon>} />
           {nicerBuildingName}.{this.props.level}.{this.props.room}
@@ -427,12 +423,12 @@ export class ShowSingleSubject extends React.Component {
 
 // <Link to="/subjects/123">Sample subject link</Link>
 
-let AboutDialogContent = (props) => 
+let AboutDialogContent = (props) =>
   <div>
     <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
 
     <p>Like us on <a href="https://www.facebook.com/dropinuts" target="_blank">Facey</a></p>
-    
+
     <p>Built by UTS students, for UTS students</p>
 
     <a href="https://goo.gl/forms/zKenkNGlyTMm4raQ2" target="_blank">Feedback, ideas and suggestions</a>
@@ -479,7 +475,7 @@ export class AppContainer extends React.Component {
     browserHistory.push(`/${newTabName}`);
   }
 
-  
+
   render() {
     return (
       <MuiThemeProvider muiTheme={muiTheme}>
