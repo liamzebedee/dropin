@@ -88,7 +88,6 @@ class ResultsSection extends React.Component {
     return (
       <div>
         <h2 style={{paddingLeft:15,paddingTop:10}}>{note}</h2>
-
         <div>
           {this.props.results.map(this.props.renderItem)}
         </div>
@@ -290,7 +289,8 @@ export class NearbyClasses extends React.Component {
                         }}/>
                   </ToolbarGroup>
                 </Toolbar>
-                <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>} />
+                {this.state.searchNearbyResults.length ? <ResultsSection unitOfMeasurement={"classes"} results={this.state.searchNearbyResults} renderItem={(item, i) => <ClassCard key={i} {...item}/>
+                } />:'Loading...'}
               </div>;
   }
 }
