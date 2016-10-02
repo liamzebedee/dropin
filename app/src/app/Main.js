@@ -42,6 +42,18 @@ import _ from 'underscore'
 
 import API from './API';
 
+
+
+function copyToClipboard(text) {
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val(text).select();
+  document.execCommand("copy");
+  $temp.remove();
+}
+
+
+
 var moment = require('moment');
 moment.locale('en-AU');
 
@@ -315,12 +327,17 @@ class SubjectInfoCard extends React.Component {
 class ClassCard extends React.Component {
   constructor(props) {
     super(props);
-    this.navToClass = this.navToClass.bind(this)
+    // this.navToClass = this.navToClass.bind(this)
+    this.shareClass = this.shareClass.bind(this)
     this.navToSubject = this.navToSubject.bind(this)
   }
 
+  shareClass() {
+    copyToClipboard("SAG")
+  }
+
   navToClass() {
-    browserHistory.push(`/search-subjects/subjects/${this.props.subjectId}`);
+    // browserHistory.push(`//subjects/${this.props.subjectId}`);
   }
 
   navToSubject() {
@@ -340,6 +357,7 @@ class ClassCard extends React.Component {
 
     return (
     <Card>
+
 
       <CardHeader
         title={this.props.subject.name}
@@ -378,7 +396,7 @@ class ClassCard extends React.Component {
           primary={true}
           style={{margin: 12}}
           icon={<FontIcon className="material-icons">share</FontIcon>}
-          onClick={this.navToClass}
+          onClick={this.shareClass}
         />
         <RaisedButton
           label="View subject"
@@ -400,15 +418,18 @@ class ClassCard extends React.Component {
 export class ShowSingleSubject extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {}
+    this.state = {
+      subject: null
+    }
   }
 
   componentDidMount() {
     let info = API.getSubjectInfo(this.props.params.id).then((info) => {
-      //console.log('Called',info);
+      console.log('Called',info);
       this.setState({ subject: info });
     });
   }
+
   render() {
     if(!this.state.subject) {
       return <div>Loading...</div>;
@@ -437,8 +458,6 @@ export class ShowSingleSubject extends React.Component {
 
 
 
-// <Link to="/subjects/123">Sample subject link</Link>
-
 let AboutDialogContent = (props) =>
   <div>
     <p>Don't be a drop out! Come drop in! Any class at UTS, at your fingertips -- university as a place of open learning!</p>
@@ -454,6 +473,8 @@ let AboutDialogContent = (props) =>
      <a href="https://github.com/jayesh100/" target="_blank">Jayesh Malhotra</a>.</p>
   </div>;
 
+const SUBJECTS_SEARCH_TAB = "search-subjects";
+const SUBJECTS_NEARBY_TAB = "nearby-subjects";
 
 export class AppContainer extends React.Component {
   constructor(props, context) {
@@ -461,7 +482,7 @@ export class AppContainer extends React.Component {
     this.handleUserSwapTab = this.handleUserSwapTab.bind(this)
     this.state = {
       aboutDialogOpen: false,
-      currentTab: 'search',
+      currentTab: SUBJECTS_NEARBY_TAB,
     };
   }
 
@@ -475,17 +496,32 @@ export class AppContainer extends React.Component {
   }
 
   updateTabForRoute(route) {
-    if(route.startsWith('/search-subjects'))
-      this.setState({ currentTab: 'search-subjects' })
+    if(route.startsWith('/subjects'))
+      this.setState({ currentTab: SUBJECTS_SEARCH_TAB })
     else if(route.startsWith('/nearby'))
-      this.setState({ currentTab: 'nearby' })
+      this.setState({ currentTab: SUBJECTS_NEARBY_TAB })
   }
 
   handleUserSwapTab(newTabName) {
     // TODO BUG WITH FUCKING onChange in Material-UI (React) http://www.material-ui.com/#/components/Tabs
     // It apparently forwards all the onChange events for all the child components here.
     if(typeof(newTabName) !== 'string') return;
-    browserHistory.push(`/${newTabName}`);
+
+    // TODO this is a bit of a bad hack
+    // but we don't care that much
+    let path;
+
+    switch(newTabName) {
+      case SUBJECTS_SEARCH_TAB:
+        path = '/subjects/search'
+        break
+      case SUBJECTS_NEARBY_TAB:
+        path = '/nearby';
+        break;
+    }
+
+    if(!path) throw new Error("Something up with routing.")
+    browserHistory.push(path)
   }
 
 
@@ -503,11 +539,11 @@ export class AppContainer extends React.Component {
           iconElementLeft={<IconButton onClick={() => this.setState({ aboutDialogOpen: true })}><ActionInfoOutline/></IconButton>}/>
 
           <Tabs value={this.state.currentTab} onChange={this.handleUserSwapTab}>
-            <Tab label="Nearby" value={'nearby'}>
+            <Tab label="Nearby" value={SUBJECTS_NEARBY_TAB}>
               {this.props.children}
             </Tab>
 
-            <Tab label="Search" value={'search-subjects'}>
+            <Tab label="Search" value={SUBJECTS_SEARCH_TAB}>
               {this.props.children}
             </Tab>
           </Tabs>

@@ -40,20 +40,6 @@ router.get('/', function(req, res) {
 });
 
 router.get('/classes/search', (req, res) => {
-	// let now = new Date();
-
-  // let defaultQuery = {
-  //   // classType: "Tut",
-  //   day: now.getDay(),
-  //   hour: now.getHours(),
-  // }
-
-  // let testQuery = {
-  //   building: "CB10",
-  //   day: 0, // monday
-  //   hour: 10,
-  // }
-
   let query = {
     building: ""+req.query.building,
     day: Number(req.query.day),
@@ -69,8 +55,6 @@ router.get('/classes/search', (req, res) => {
     "session.trimester": "SPR",
   };
 
-  console.log(selector);
-
   let data;
 
   classes
@@ -84,7 +68,6 @@ router.get('/classes/search', (req, res) => {
     let dataWithSubjectInfo = arr;
 
     let promises = dataWithSubjectInfo.map(classInfo => {
-      // NOTE result of findOne should be JSON blob
       let promise = subjectInfos.findOne({ code: classInfo.subjectId })
       return promise;
     })
@@ -101,57 +84,55 @@ router.get('/classes/search', (req, res) => {
   })
 });
 
-router.get('/subject', (req,res)=>{
+router.get('/subject', (req,res) => {
   console.log(req.query.subjectId);
+
   const selector = {
     code : "" + req.query.subjectId,
   };
   subjectInfos
-    .findOne(selector)
-    .then((doc,err)=>{
-      if (!err){
+  .findOne(selector)
+  .then((doc,err)=>{
+    if (!err){
       res.send(doc);
-      }else res.sendStatus(500);
-    });
+    } else res.sendStatus(500);
+  });
 });
 
 
-// router.get('/subjects/search', (req, res) => {
-//   let query = {
-//     q: req.query.q
-//     // q: "48023",
-//     // q: "french",
-//   }
+router.get('/subjects/search', (req, res) => {
+  let query = {
+    q: req.query.q
 
-//   let selector;
+    // q: "48023",
+    // q: "french",
+  }
 
-//   if(isDigit(query.q.charAt(0))) {
-//     // Search for subject code
-//     selector = {
-//       subjectId: query.q
-//     };
+  let selector;
 
-//   } else {
-//     // Search for subject name
-//     selector = {
-//       $text: {
-//         $search: query.q.toLowerCase(),
-//           // $caseSensitive: false,
-//           $language: "EN"
-//         }
-//       };
-//     }
+  if(isDigit(query.q.charAt(0))) {
+    // Search for subject code
+    selector = {
+      code: query.q
+    };
 
-//     // var subjects = mongoDatabase.collection('classes');
-//     subjectInfos.find(selector).toArray((err,re)=>{
-//       res.send(re);
-//     });
+  } else {
+    // Search for subject name
+    selector = {
+      $text: {
+        $search: query.q.toLowerCase(),
+        $language: "EN"
+      }
+    };
+  
+  }
 
-// })
-
-router.get('/feedback', (req,res)=>{
+  subjectInfos.find(selector).toArray((err, arr) => {
+    res.send(arr);
+  });
 
 })
+
 
 // Prefix with api
 app.use('/api', router);
@@ -161,12 +142,15 @@ MongoClient.connect(MONGO_URL, function(err, db) {
   if(!err) {
     console.log("We are connected");
     mongoDatabase = db;
-    mongoDatabase.collection('classes').createIndex({ subjectName: "text" });
 
+    // Setup collections
     classes = mongoDatabase.collection('classes')
     subjectInfos = mongoDatabase.collection('subjectInfos')
 
-    app.listen(port, ()=>{console.log("Listening on", port)});
+    // Indexes
+    classes.createIndex({ name: "text" });
+
+    app.listen(port, () => { console.log("Listening on", port) });
   }else{
     console.log("MongoDB connection error", err);
   }

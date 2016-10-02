@@ -1,3 +1,3 @@
 export default function initAnalytics() {
-amplitude.logEvent('startup');	
+	amplitude.logEvent('startup');	
 }

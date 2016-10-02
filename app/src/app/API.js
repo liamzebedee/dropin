@@ -36,22 +36,19 @@ export default class API {
 		console.log(`Searching for subjects near ${building} around ${hour} on ${dayStr}day`)
 
 		let res = fetch(`${API_BASE}/classes/search?building=${building}&day=${day}&hour=${hour}`)
-      .then((res) => res.json());
+		.then((res) => res.json());
 
 		//if(MOCK_DATA) return promiseFromData(MOCK_CLASSES_BY_TEXT);
-    return res;
-
+	    return res;
 	}
 
 	static getSubjectInfo(id) {
 		console.log(`Getting info for subject ${id}`);
-        let res = fetch(`${API_BASE}/subject?subjectId=${id}`)
-      .then((res) => res.json());
 
-    //if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO);
-
-    return res;
-
+	    let res = fetch(`${API_BASE}/subject?subjectId=${id}`).then((res) => res.json());
+	    
+	    //if(MOCK_DATA) return promiseFromData(MOCK_SUBJECT_INFO);
+	    return res;
 	}
 }
 
